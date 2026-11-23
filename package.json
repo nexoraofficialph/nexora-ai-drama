@@ -9,7 +9,8 @@
     "cap:sync": "cap sync",
     "cap:open:android": "cap open android",
     "assets:android": "node scripts/generate-assets.cjs && npx capacitor-assets generate --android",
-    "prepare:web": "node scripts/prepare-web.cjs"
+    "prepare:web": "node scripts/prepare-web.cjs",
+    "validate:source": "node scripts/check-source-assets.cjs"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",
