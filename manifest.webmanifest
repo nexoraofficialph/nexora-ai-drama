@@ -1,0 +1,19 @@
+{
+  "name": "NEXORA AI DRAMA",
+  "short_name": "NEXORA DRAMA",
+  "description": "Short dramas and cinematic stories from NEXORA STUDIO.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08080c",
+  "theme_color": "#08080c",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
