@@ -46,7 +46,9 @@ const defaultDramas=[
 const getStore=(key)=>{try{return JSON.parse(localStorage.getItem(key)||"[]")}catch{return[]}};
 let dramas=getStore("nexoraCatalog");if(!dramas.length)dramas=defaultDramas;let studioEditIndex=-1;let saved=getStore("nexoraSaved"),recent=getStore("nexoraRecent"),feedIndex=0,selectedDrama=0,feedLiked=false,libraryTab="saved",activeDiscoverGenre="All";
 function persist(){localStorage.setItem("nexoraSaved",JSON.stringify(saved));localStorage.setItem("nexoraRecent",JSON.stringify(recent));if(nxSession?.user)uploadLocalList()}
-function posterCard(d,i){return '<article class="drama" onclick="openDrama('+i+')"><div class="poster '+d.poster+'"><span>'+d.label+'</span></div><h3>'+d.title+'</h3><p>'+d.genre+' · '+d.episodes+' episodes</p><span class="tag">NEXORA ORIGINAL</span></article>'}
+function safeViewerText(v){return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]))}
+function safePosterClass(v){return /^p[1-8]$/.test(String(v||""))?String(v):"p1"}
+function posterCard(d,i){return '<article class="drama" onclick="openDrama('+i+')"><div class="poster '+safePosterClass(d.poster)+'"><span>'+safeViewerText(d.label||"NEXORA SERIES")+'</span></div><h3>'+safeViewerText(d.title)+'</h3><p>'+safeViewerText(d.genre)+' · '+safeViewerText(d.episodes)+' episodes</p><span class="tag">NEXORA ORIGINAL</span></article>'}
 function renderCards(target,arr){document.getElementById(target).innerHTML=arr.map(i=>posterCard(dramas[i],i)).join("")}
 function renderHome(filter="All"){let ids=dramas.map((d,i)=>i);renderCards("homeTrending",ids.slice(0,4));renderCards("homeGrid",ids.filter(i=>filter==="All"||dramas[i].genre===filter))}
 function renderSearch(){let q=(document.getElementById("searchInput").value||"").toLowerCase();let ids=dramas.map((d,i)=>i).filter(i=>(activeDiscoverGenre==="All"||dramas[i].genre===activeDiscoverGenre)&&((dramas[i].title+" "+dramas[i].genre+" "+dramas[i].desc).toLowerCase().includes(q)));renderCards("discoverGrid",ids)}
