@@ -26,6 +26,9 @@ jobs:
       - name: Install project dependencies
         run: npm install
 
+      - name: Generate Android project
+        run: npx cap add android
+
       - name: Generate native launcher and splash assets
         run: npm run assets:android
 
@@ -35,9 +38,6 @@ jobs:
           cp index.html manifest.webmanifest icon.svg app-icon.png www/
           mkdir -p www/assets
           cp assets/splash.svg www/assets/
-
-      - name: Generate Android project
-        run: npx cap add android
 
       - name: Sync web app to Android
         run: npx cap sync android
