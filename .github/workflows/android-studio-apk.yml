@@ -33,6 +33,8 @@ jobs:
           java-version: 21
       - name: Install dependencies
         run: npm install
+      - name: Switch to Studio native config before Android project creation
+        run: cp capacitor.studio.config.json capacitor.config.json
       - name: Generate Android project for Studio
         run: npx cap add android
       - name: Prepare Studio assets
@@ -46,8 +48,9 @@ jobs:
           test -s www/manifest.webmanifest
           test -s www/icon.svg
           test -s app-icon.png
-      - name: Switch to Studio native config
-        run: cp capacitor.studio.config.json capacitor.config.json
+      - name: Verify Studio Android identity
+        run: |
+          grep -R "com.nexorastudio.studio" android
       - name: Sync Android Studio app
         run: npx cap sync android
       - name: Build Studio debug APK
