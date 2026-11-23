@@ -1,0 +1,18 @@
+{
+  "name": "nexora-ai-drama",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEXORA AI DRAMA - Managed by NEXORA STUDIO",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo \"Static web app ready for Capacitor\"",
+    "cap:sync": "cap sync",
+    "cap:open:android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}
