@@ -34,6 +34,9 @@ jobs:
       - name: Install project dependencies
         run: npm install
 
+      - name: Validate inline scripts and checkout wiring
+        run: node scripts/validate-web.cjs
+
       - name: Generate Android project
         run: npx cap add android
 
