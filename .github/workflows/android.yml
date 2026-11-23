@@ -29,6 +29,7 @@ jobs:
           node --check scripts/generate-assets.cjs
           node --check scripts/prepare-web.cjs
           node scripts/check-inline-js.cjs index.html
+          npm run validate:source
       - name: Create Android platform
         run: npx cap add android
       - name: Sync Capacitor
