@@ -1,5 +1,6 @@
--- NEXORA STUDIO Cloud Catalog schema (migration groundwork)
--- Owner/admin authorization relies on app_metadata claims managed server-side.
+-- NEXORA STUDIO Cloud Catalog schema (secure publishing groundwork)
+-- Apply only to the intended NEXORA Supabase project after review.
+-- Admin membership must be provisioned through trusted SQL; never via client signup.
 create extension if not exists pgcrypto;
 
 create table if not exists public.studio_admins (
@@ -9,6 +10,7 @@ create table if not exists public.studio_admins (
 alter table public.studio_admins enable row level security;
 revoke all on public.studio_admins from anon, authenticated;
 grant select on public.studio_admins to authenticated;
+drop policy if exists "admins can view own studio membership" on public.studio_admins;
 create policy "admins can view own studio membership" on public.studio_admins
   for select to authenticated using (user_id = (select auth.uid()));
 
@@ -26,6 +28,13 @@ create table if not exists public.dramas (
   updated_at timestamptz not null default now()
 );
 alter table public.dramas enable row level security;
+grant select on public.dramas to anon, authenticated;
+grant insert, update, delete on public.dramas to authenticated;
+drop policy if exists "public can view published dramas" on public.dramas;
+drop policy if exists "studio admins can view all dramas" on public.dramas;
+drop policy if exists "studio admins insert dramas" on public.dramas;
+drop policy if exists "studio admins update dramas" on public.dramas;
+drop policy if exists "studio admins delete dramas" on public.dramas;
 create policy "public can view published dramas" on public.dramas for select to anon, authenticated using (status='published');
 create policy "studio admins can view all dramas" on public.dramas for select to authenticated using (exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
 create policy "studio admins insert dramas" on public.dramas for insert to authenticated with check (exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
@@ -47,6 +56,13 @@ create table if not exists public.episodes (
   unique(drama_id, episode_number)
 );
 alter table public.episodes enable row level security;
+grant select on public.episodes to anon, authenticated;
+grant insert, update, delete on public.episodes to authenticated;
+drop policy if exists "public can view episodes of published dramas" on public.episodes;
+drop policy if exists "admins view all episodes" on public.episodes;
+drop policy if exists "admins insert episodes" on public.episodes;
+drop policy if exists "admins update episodes" on public.episodes;
+drop policy if exists "admins delete episodes" on public.episodes;
 create policy "public can view episodes of published dramas" on public.episodes for select to anon, authenticated using (status='published' and exists(select 1 from public.dramas d where d.id=drama_id and d.status='published'));
 create policy "admins view all episodes" on public.episodes for select to authenticated using (exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
 create policy "admins insert episodes" on public.episodes for insert to authenticated with check (exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
@@ -64,8 +80,13 @@ create table if not exists public.studio_assets (
   created_at timestamptz not null default now()
 );
 alter table public.studio_assets enable row level security;
+grant select, insert, update, delete on public.studio_assets to authenticated;
+drop policy if exists "admins manage studio assets" on public.studio_assets;
 create policy "admins manage studio assets" on public.studio_assets for all to authenticated using (exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid()))) with check (exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
 
 create index if not exists dramas_status_updated_idx on public.dramas(status, updated_at desc);
 create index if not exists episodes_drama_status_idx on public.episodes(drama_id,status,episode_number);
 create index if not exists assets_drama_idx on public.studio_assets(drama_id);
+
+-- Optional safe timestamp maintenance trigger is intentionally not included yet;
+-- the Studio publishing client must set updated_at when editing catalog records.
