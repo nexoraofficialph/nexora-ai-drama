@@ -24,6 +24,11 @@ jobs:
         run: npm run assets:android
       - name: Prepare web bundle
         run: npm run prepare:web
+      - name: JavaScript syntax validation
+        run: |
+          node --check scripts/generate-assets.cjs
+          node --check scripts/prepare-web.cjs
+          node scripts/check-inline-js.cjs index.html
       - name: Create Android platform
         run: npx cap add android
       - name: Sync Capacitor
