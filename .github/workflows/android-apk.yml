@@ -26,11 +26,15 @@ jobs:
       - name: Install project dependencies
         run: npm install
 
+      - name: Generate native launcher and splash assets
+        run: npm run assets:android
+
       - name: Prepare Capacitor web assets
         run: |
           mkdir -p www
-          cp index.html manifest.webmanifest icon.svg www/
-          cp sw.js www/ || true
+          cp index.html manifest.webmanifest icon.svg app-icon.png www/
+          mkdir -p www/assets
+          cp assets/splash.svg www/assets/
 
       - name: Generate Android project
         run: npx cap add android
