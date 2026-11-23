@@ -69,4 +69,13 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
 }
 </script>
+<!-- NEXORA premium splash overlay -->
+<style>
+#nexora-splash{position:fixed;inset:0;z-index:9999;background:#08080c;display:grid;place-items:center;opacity:1;animation:nxSplashOut .65s ease 2.35s forwards;pointer-events:none}
+#nexora-splash img{width:100%;height:100%;object-fit:cover}
+@keyframes nxSplashOut{to{opacity:0;visibility:hidden}}
+@media(prefers-reduced-motion:reduce){#nexora-splash{animation-delay:1s;animation-duration:.2s}}
+</style>
+<div id="nexora-splash" aria-label="NEXORA AI DRAMA loading"><img src="./assets/splash.svg" alt="NEXORA AI DRAMA — Managed by NEXORA Studio"></div>
+<script>window.addEventListener('load',()=>{const el=document.getElementById('nexora-splash');if(el)setTimeout(()=>el.remove(),3100)});</script>
 </body></html>
