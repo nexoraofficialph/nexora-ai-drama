@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const htmlPath = process.argv[2] || 'index.html';
 const html = fs.readFileSync(htmlPath, 'utf8');
-const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)];
+const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
 if (!scripts.length) {
   console.error('No inline scripts found.');
   process.exit(1);
