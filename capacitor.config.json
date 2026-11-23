@@ -1,0 +1,6 @@
+{
+  "appId": "com.nexorastudio.aidrama",
+  "appName": "NEXORA AI DRAMA",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
