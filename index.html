@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#09090d">
+<title>NEXORA AI DRAMA — NEXORA STUDIO</title>
+<style>
+:root{color-scheme:dark;--bg:#09090d;--panel:#14141c;--muted:#a7a7b4;--accent:#d72845;--text:#f6f5f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 5vw;border-bottom:1px solid #262630;position:sticky;top:0;background:#09090deF;backdrop-filter:blur(12px);z-index:5}
+.brand{font-weight:900;letter-spacing:.13em;font-size:17px}.brand span{color:var(--accent)}.studio{font-size:10px;color:var(--muted);letter-spacing:.15em;margin-top:2px}
+nav{display:flex;gap:20px}nav a{color:#c5c5cf;text-decoration:none;font-size:13px}nav a:hover{color:white}
+main{max-width:1200px;margin:auto;padding:0 24px 60px}
+.hero{min-height:440px;margin:28px 0 32px;border-radius:22px;overflow:hidden;position:relative;background:radial-gradient(circle at 80% 25%,#862c4a 0,#402039 25%,transparent 50%),linear-gradient(115deg,#151522,#2b1628 55%,#10101a);display:flex;align-items:flex-end;padding:clamp(24px,5vw,58px)}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#09090d 0%,#09090d99 46%,transparent 100%),linear-gradient(0deg,#09090d88,transparent 60%);pointer-events:none}
+.hero-content{position:relative;max-width:540px}.eyebrow{color:#ff7e92;font-size:11px;letter-spacing:.2em;font-weight:700}.hero h1{font-size:clamp(36px,6vw,64px);line-height:1.02;margin:12px 0;letter-spacing:-.04em}.hero p{color:#c9c8d1;max-width:460px}.meta{color:#aaaab7;font-size:12px;margin:16px 0}.btn{border:0;border-radius:9px;background:var(--accent);color:white;font-weight:700;padding:12px 18px;cursor:pointer}.btn:hover{filter:brightness(1.12)}.ghost{background:#ffffff17;border:1px solid #ffffff25;margin-left:8px}
+section{margin-top:30px}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.section-head h2{font-size:19px;margin:0}.section-head small{color:var(--muted)}
+.filters{display:flex;gap:8px;overflow:auto;padding-bottom:6px;margin:12px 0 20px}.filter{white-space:nowrap;border:1px solid #34343e;background:#15151c;color:#bcbcc7;padding:8px 14px;border-radius:30px;cursor:pointer}.filter.active{background:#f4f3f5;color:#111;border-color:#f4f3f5}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{min-width:0;cursor:pointer}.poster{height:220px;border-radius:14px;position:relative;overflow:hidden;padding:14px;display:flex;align-items:flex-end;background:linear-gradient(145deg,#24213b,#6a243a)}.poster:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#05050bdf,transparent 70%)}.poster span{position:relative;font-size:10px;letter-spacing:.15em;color:#f0c5ce}.poster.p2{background:radial-gradient(circle at 75% 20%,#bb7b51,#3e2534 48%,#10121b)}.poster.p3{background:linear-gradient(145deg,#143c4c,#173141,#301b32)}.poster.p4{background:radial-gradient(circle at 25% 25%,#8e4258,#352035 55%,#101018)}.poster.p5{background:linear-gradient(130deg,#382c54,#8e3651,#12121b)}.poster.p6{background:radial-gradient(circle at 65% 35%,#7e6b3b,#37302c 50%,#12131c)}.card h3{margin:10px 0 4px;font-size:14px}.card p{margin:0;color:var(--muted);font-size:12px}.tag{display:inline-block;margin-top:7px;color:#e8b6c0;font-size:10px}
+footer{border-top:1px solid #262630;text-align:center;color:#747480;padding:24px;font-size:12px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.poster{height:190px}}
+@media(max-width:560px){header{padding:14px 18px}nav{gap:12px}nav a:nth-child(2){display:none}main{padding:0 16px 40px}.hero{min-height:390px;margin-top:18px;padding:24px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.poster{height:210px}.brand{font-size:15px}}
+</style>
+</head>
+<body>
+<header>
+<div><div class="brand">NEXORA <span>AI DRAMA</span></div><div class="studio">MANAGED BY NEXORA STUDIO</div></div>
+<nav><a href="#home">Home</a><a href="#browse">Browse</a><a href="#about">About</a></nav>
+</header>
+<main id="home">
+<div class="hero">
+<div class="hero-content">
+<div class="eyebrow">NEXORA ORIGINAL • FEATURED</div>
+<h1>Every story<br>has a secret.</h1>
+<p>Discover addictive short dramas, unforgettable characters, and twists that keep you watching.</p>
+<div class="meta">Drama · Mystery · Romance &nbsp; • &nbsp; Short episodes</div>
+<button class="btn" onclick="showNotice('Featured drama preview is coming soon.')">▶ &nbsp; Watch preview</button><button class="btn ghost" onclick="document.querySelector('#browse').scrollIntoView({behavior:'smooth'})">Explore dramas</button>
+</div>
+</div>
+<section id="browse">
+<div class="section-head"><h2>Explore dramas</h2><small id="count">6 stories</small></div>
+<div class="filters" role="group" aria-label="Drama genres">
+<button class="filter active" data-genre="All">All</button><button class="filter" data-genre="Romance">Romance</button><button class="filter" data-genre="Mystery">Mystery</button><button class="filter" data-genre="Fantasy">Fantasy</button><button class="filter" data-genre="Thriller">Thriller</button>
+</div>
+<div class="grid" id="dramaGrid">
+<article class="card" data-genre="Romance"><div class="poster p1"><span>NEXORA ORIGINAL</span></div><h3>Love After Midnight</h3><p>Romance · 24 episodes</p><span class="tag">NEW SERIES</span></article>
+<article class="card" data-genre="Mystery"><div class="poster p2"><span>THE SECRET UNFOLDS</span></div><h3>Behind Her Silence</h3><p>Mystery · 18 episodes</p><span class="tag">MYSTERY</span></article>
+<article class="card" data-genre="Fantasy"><div class="poster p3"><span>A WORLD BEYOND</span></div><h3>Moonbound Promise</h3><p>Fantasy · 20 episodes</p><span class="tag">FANTASY</span></article>
+<article class="card" data-genre="Thriller"><div class="poster p4"><span>TRUST NO ONE</span></div><h3>The Last Witness</h3><p>Thriller · 16 episodes</p><span class="tag">THRILLER</span></article>
+<article class="card" data-genre="Romance"><div class="poster p5"><span>ONE MORE CHANCE</span></div><h3>Second Chance CEO</h3><p>Romance · 30 episodes</p><span class="tag">ROMANCE</span></article>
+<article class="card" data-genre="Mystery"><div class="poster p6"><span>THE TRUTH IS BURIED</span></div><h3>Echoes of Yesterday</h3><p>Mystery · 22 episodes</p><span class="tag">MYSTERY</span></article>
+</div>
+</section>
+<section id="about"><div class="section-head"><h2>Stories made to binge.</h2></div><p style="color:var(--muted);max-width:620px">NEXORA AI DRAMA is a short-drama streaming experience concept by NEXORA STUDIO. This first build is a UI prototype—accounts, video playback, payments, and real drama content will be connected in later development phases.</p></section>
+</main>
+<footer>NEXORA AI DRAMA · A NEXORA STUDIO PROJECT</footer>
+<script>
+function showNotice(message){alert(message)}
+const filters=document.querySelectorAll('.filter'),cards=document.querySelectorAll('.card'),count=document.querySelector('#count');
+filters.forEach(btn=>btn.addEventListener('click',()=>{filters.forEach(x=>x.classList.remove('active'));btn.classList.add('active');let genre=btn.dataset.genre,n=0;cards.forEach(card=>{let show=genre==='All'||card.dataset.genre===genre;card.style.display=show?'':'none';if(show)n++});count.textContent=n+' stor'+(n===1?'y':'ies')}));
+cards.forEach(card=>card.addEventListener('click',()=>showNotice('Episode details and playback will be added in a future build.')));
+</script>
+</body>
+</html>
