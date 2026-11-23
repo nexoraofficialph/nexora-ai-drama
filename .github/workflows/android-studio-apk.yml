@@ -1,0 +1,50 @@
+name: Build NEXORA STUDIO Admin APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'studio/**'
+      - 'capacitor.studio.config.json'
+      - '.github/workflows/android-studio-apk.yml'
+
+jobs:
+  build-studio-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install dependencies
+        run: npm install
+      - name: Generate Android project for Studio
+        run: npx cap add android
+      - name: Prepare Studio assets
+        run: |
+          mkdir -p www
+          cp studio/index.html www/index.html
+          cp studio/manifest.webmanifest www/manifest.webmanifest
+          cp studio/icon.svg www/icon.svg
+          cp studio/icon.svg app-icon.png
+      - name: Switch to Studio native config
+        run: cp capacitor.studio.config.json capacitor.config.json
+      - name: Sync Android Studio app
+        run: npx cap sync android
+      - name: Build Studio debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - name: Upload Studio APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-studio-admin-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
