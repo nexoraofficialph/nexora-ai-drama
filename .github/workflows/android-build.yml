@@ -1,0 +1,70 @@
+name: NEXORA Android Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-debug:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install npm dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare Capacitor web directory
+        run: |
+          mkdir -p www/assets
+          cp index.html www/index.html
+          cp supabase-config.js www/supabase-config.js
+          cp manifest.webmanifest www/manifest.webmanifest
+          cp icon.svg www/icon.svg
+          cp sw.js www/sw.js
+          cp assets/splash.svg www/assets/splash.svg
+          cp assets/icon.svg www/assets/icon.svg
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Generate Android icons and splash assets
+        run: npm run assets:android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-ai-drama-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
