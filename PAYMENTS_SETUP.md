@@ -11,7 +11,7 @@
 1. Create/activate a PayMongo merchant account and complete its required verification.
 2. In PayMongo Dashboard, enable GCash, Maya, and QR Ph where eligible. Individual account capability may be limited to QR Ph; GCash/Maya may require an approved registered business profile.
 3. Create Supabase project and configure app's `supabase-config.js` with its URL and publishable/anon key. This repo's config currently has placeholders.
-4. Run `supabase/migrations/202611240001_direct_payments.sql` in the Supabase SQL editor.
+4. Run migrations in order: `202611240001_direct_payments.sql`, then `202611240002_payment_fulfillment_hardening.sql` in the Supabase SQL editor. The second migration validates paid amount/currency and deduplicates credits by provider payment ID.
 5. Deploy Edge Functions:
    ```sh
    supabase functions deploy nx-create-checkout
@@ -29,6 +29,7 @@
 8. Verify signature validation and duplicate-event handling in test mode, then test: success, cancellation, failed payment, replayed webhook, concurrent duplicate, wrong amount, expired QR, and no logged-in user.
 9. Add frontend coin store buttons to call `nx-create-checkout` with authenticated Supabase session, open returned `checkoutUrl`, and reload wallet balance after verified payment. Never credit coins from client redirect/success screens.
 10. Before live: audit the RPC and policies, test payment amounts/reference validation, refund/reversal policy, payment provider account capabilities, and test with real devices.
+11. The app coin store is wired to the `nx-create-checkout` Edge Function. Sign-in is required; a checkout redirect does not credit coins. Use the Refresh wallet/status button after payment while webhook processing is confirmed.
 
 ## Payment behavior
 - The Edge Function authenticates the Supabase user and accepts only server-defined package IDs. Price/coin values cannot be client-specified.
