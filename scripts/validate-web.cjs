@@ -7,7 +7,7 @@ scripts.forEach((source,i)=>{try{new vm.Script(source,{filename:"index.html:inli
 const required=["nxStartCheckout('starter')","nxStartCheckout('value')","nxStartCheckout('premium')","async function nxRefreshWallet","nxSupabase.functions.invoke(\"nx-create-checkout\""];
 for(const needle of required)if(!html.includes(needle)){console.error("Missing required checkout wiring: "+needle);process.exitCode=1;}
 if(html.includes("DEMO PURCHASES")||html.includes("buyDemoCoins(50)")){console.error("Old demo coin-shop buttons still present.");process.exitCode=1;}
-const declared=new Set([...html.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m=>m[1]));
+const declared=new Set([...html.matchAll(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m=>m[1]));
 const handlers=[...html.matchAll(/onclick\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
 const called=new Set();
 for(const handler of handlers)for(const m of handler.matchAll(/\b([A-Za-z_$][\w$]*)\s*\(/g)){if(!["if","toast"].includes(m[1]))called.add(m[1]);}
