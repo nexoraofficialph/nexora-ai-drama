@@ -35,7 +35,7 @@ jobs:
       - name: Prepare Capacitor web assets
         run: |
           mkdir -p www
-          cp index.html manifest.webmanifest icon.svg app-icon.png www/
+          cp index.html manifest.webmanifest icon.svg app-icon.png supabase-config.js www/
           mkdir -p www/assets
           cp assets/splash.svg www/assets/
 
