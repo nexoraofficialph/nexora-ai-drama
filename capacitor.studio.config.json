@@ -1,0 +1,15 @@
+{
+  "appId": "com.nexorastudio.studio",
+  "appName": "NEXORA STUDIO",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#09090e",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_INSIDE"
+    }
+  }
+}
