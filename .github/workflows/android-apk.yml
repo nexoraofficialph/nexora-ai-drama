@@ -26,6 +26,12 @@ jobs:
       - name: Install project dependencies
         run: npm install
 
+      - name: Prepare Capacitor web assets
+        run: |
+          mkdir -p www
+          cp index.html manifest.webmanifest icon.svg www/
+          cp sw.js www/ || true
+
       - name: Generate Android project
         run: npx cap add android
 
