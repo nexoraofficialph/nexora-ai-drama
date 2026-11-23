@@ -1,7 +1,7 @@
 const fs=require("node:fs");
 const vm=require("node:vm");
 const html=fs.readFileSync("index.html","utf8");
-const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
 if(!scripts.length)throw new Error("No inline scripts found");
 scripts.forEach((source,i)=>{try{new vm.Script(source,{filename:"index.html:inline-script-"+(i+1)});}catch(e){console.error(e.message);process.exitCode=1;}});
 const required=["nxStartCheckout('starter')","nxStartCheckout('value')","nxStartCheckout('premium')","async function nxRefreshWallet","nxSupabase.functions.invoke(\"nx-create-checkout\""];
