@@ -5,10 +5,10 @@ function hex(buf: ArrayBuffer) { return [...new Uint8Array(buf)].map(b=>b.toStri
 async function verifySignature(raw: string, header: string, secret: string) {
   const parts=Object.fromEntries(header.split(",").map(s=>s.trim().split("=",2)));
   const timestamp=parts.t; const test=parts.te; const live=parts.li;
-  if(!timestamp || !(test||live)) return false;
+  if(!timestamp || !(test||live)) return false;\n  const ts=Number(timestamp); if(!Number.isFinite(ts) || Math.abs(Date.now()/1000-ts)>300) return false; // reject stale replay attempts\n  
   const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
   const expected=hex(await crypto.subtle.sign("HMAC",key,new TextEncoder().encode(timestamp+"."+raw)));
-  const received=(Deno.env.get("PAYMONGO_MODE")==="live"?live:test)||"";
+  const mode=Deno.env.get("PAYMONGO_MODE")||"test";\n  const received=(mode==="live"?live:test)||"";
   if(received.length!==expected.length)return false;
   let diff=0; for(let i=0;i<expected.length;i++)diff|=expected.charCodeAt(i)^received.charCodeAt(i); return diff===0;
 }
