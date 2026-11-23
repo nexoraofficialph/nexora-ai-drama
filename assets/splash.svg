@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+<defs><radialGradient id="bg" cx="50%" cy="44%" r="70%"><stop offset="0" stop-color="#24101a"/><stop offset=".45" stop-color="#0e0b11"/><stop offset="1" stop-color="#050507"/></radialGradient><linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="#f4dce1"/><stop offset=".55" stop-color="#e22b48"/><stop offset="1" stop-color="#6e0d23"/></linearGradient></defs>
+<rect width="1080" height="1920" fill="url(#bg)"/>
+<g fill="none" stroke="#e21f41" opacity=".26"><path d="M-80 270C270 70 720 10 1160 240" stroke-width="4"/><path d="M-60 1630C250 1930 860 1840 1160 1540" stroke-width="6"/><circle cx="540" cy="810" r="410" stroke-width="3"/></g>
+<g transform="translate(280 570) scale(1.02)">
+<rect width="512" height="512" rx="112" fill="#08080c" opacity=".88"/>
+<circle cx="256" cy="256" r="194" fill="none" stroke="#d82142" stroke-width="9" opacity=".4"/>
+<path d="M128 112h88v112l168 176h-98L216 278v122h-88z" fill="url(#metal)" stroke="#ff526b" stroke-width="3" stroke-linejoin="round"/>
+<path d="M240 215l78 49-78 49z" fill="#ff263f" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+</g>
+<text x="540" y="1260" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="116" text-anchor="middle" letter-spacing="15" fill="#f5f4f6">NEXORA</text>
+<text x="540" y="1380" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="68" text-anchor="middle" letter-spacing="24" fill="#e22b48">AI DRAMA</text>
+<text x="540" y="1475" font-family="Arial,Helvetica,sans-serif" font-size="28" text-anchor="middle" letter-spacing="9" fill="#b8b7c1">MANAGED BY NEXORA STUDIO</text>
+<path d="M240 1600h600" stroke="#e22b48" stroke-width="2" opacity=".5"/>
+<text x="540" y="1675" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="middle" letter-spacing="8" fill="#777782">EVERY STORY HAS A SECRET</text>
+</svg>
