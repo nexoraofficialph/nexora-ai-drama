@@ -96,13 +96,25 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
 }
 </script>
-<!-- NEXORA premium splash overlay -->
+<!-- NEXORA premium cinematic live splash -->
 <style>
-#nexora-splash{position:fixed;inset:0;z-index:9999;background:#08080c;display:grid;place-items:center;opacity:1;animation:nxSplashOut .35s ease .65s forwards;pointer-events:none}
-#nexora-splash img{width:100%;height:100%;object-fit:cover}
-@keyframes nxSplashOut{to{opacity:0;visibility:hidden}}
-@media(prefers-reduced-motion:reduce){#nexora-splash{animation-delay:.15s;animation-duration:.2s}}
+#nexora-splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 38%,#2b1822 0%,#111018 34%,#07070b 76%);display:flex;align-items:center;justify-content:center;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease;pointer-events:none;overflow:hidden}
+#nexora-splash:before{content:"";position:absolute;width:65vw;height:65vw;max-width:520px;max-height:520px;border-radius:50%;border:1px solid #e22b4828;box-shadow:0 0 80px #e22b4814,inset 0 0 70px #e22b4810;animation:nxOrbit 3.2s ease-in-out infinite}
+#nexora-splash:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,#ffffff05 48%,transparent 72%);transform:translateX(-100%);animation:nxSweep 2.4s ease-in-out infinite}
+.nx-splash-center{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:28px;width:min(90vw,420px)}
+.nx-splash-logo{width:76px;height:76px;border-radius:23px;border:1px solid #ffffff20;background:linear-gradient(145deg,#2a2a35,#0d0d12);box-shadow:0 18px 55px #0008,inset 0 1px #ffffff12;display:grid;place-items:center;position:relative;animation:nxPulse 2s ease-in-out infinite}
+.nx-splash-logo b{font-size:48px;letter-spacing:-.12em;font-weight:950;color:#f7f5f7;transform:skew(-8deg)}.nx-splash-logo i{position:absolute;width:22px;height:22px;border-radius:50%;right:-5px;bottom:-5px;background:#e22b48;border:3px solid #09090d;display:grid;place-items:center;font-style:normal;font-size:9px;color:white}
+.nx-splash-title{margin-top:24px;font-size:20px;font-weight:950;letter-spacing:.18em;color:#f6f5f7}.nx-splash-title em{font-style:normal;color:#ff405b}.nx-splash-sub{font-size:9px;letter-spacing:.32em;font-weight:800;color:#a8a8b4;margin-top:7px}.nx-splash-loading{margin-top:36px;width:180px;height:3px;border-radius:4px;background:#ffffff12;overflow:hidden}.nx-splash-loading span{display:block;height:100%;width:35%;border-radius:4px;background:linear-gradient(90deg,#a41d35,#ff526c);animation:nxLoadBar 1.35s cubic-bezier(.3,.1,.2,1) infinite}.nx-splash-status{margin-top:12px;font-size:10px;letter-spacing:.14em;color:#868692;animation:nxStatus 1.6s ease-in-out infinite}
+#nexora-splash.hide{opacity:0;visibility:hidden}
+@keyframes nxPulse{0%,100%{transform:scale(1);box-shadow:0 18px 55px #0008,inset 0 1px #ffffff12}50%{transform:scale(1.045);box-shadow:0 18px 60px #e22b4824,inset 0 1px #ffffff18}}
+@keyframes nxOrbit{0%,100%{transform:scale(.94) rotate(0);opacity:.35}50%{transform:scale(1.04) rotate(45deg);opacity:.75}}
+@keyframes nxSweep{0%,35%{transform:translateX(-100%)}70%,100%{transform:translateX(100%)}}
+@keyframes nxLoadBar{0%{transform:translateX(-130%)}100%{transform:translateX(480%)}}
+@keyframes nxStatus{0%,100%{opacity:.55}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){#nexora-splash:before,.nx-splash-logo,.nx-splash-loading span,.nx-splash-status,#nexora-splash:after{animation:none}.nx-splash-loading span{width:100%}}
 </style>
-<div id="nexora-splash" aria-label="NEXORA AI DRAMA loading"><img src="./assets/splash.svg" alt="NEXORA AI DRAMA — Managed by NEXORA Studio"></div>
-<script>window.addEventListener('load',()=>{const el=document.getElementById('nexora-splash');if(el)setTimeout(()=>el.remove(),1050)});</script>
+<div id="nexora-splash" aria-label="NEXORA AI DRAMA loading" role="status"><div class="nx-splash-center"><div class="nx-splash-logo" aria-hidden="true"><b>N</b><i>▶</i></div><div class="nx-splash-title">NEXORA <em>AI</em></div><div class="nx-splash-sub">DRAMA · PREMIUM STORIES</div><div class="nx-splash-loading"><span></span></div><div class="nx-splash-status" id="nx-splash-status">Preparing your experience</div></div></div>
+<script>
+(()=>{const el=document.getElementById('nexora-splash');if(!el)return;const status=document.getElementById('nx-splash-status');const labels=['Preparing your experience','Loading drama catalog','Setting the scene','Almost ready'];let idx=0;const start=performance.now();const cycle=()=>{if(!el.isConnected)return;if(status)status.textContent=labels[idx++%labels.length];};cycle();const loop=setInterval(cycle,650);const dismiss=()=>{setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),600);clearInterval(loop)},Math.max(450,1900-(performance.now()-start)));};if(document.readyState==='complete')dismiss();else window.addEventListener('load',dismiss,{once:true});})();
+</script>
 </body></html>
