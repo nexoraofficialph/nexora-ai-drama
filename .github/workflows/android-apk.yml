@@ -4,6 +4,14 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore:
+      - 'studio/**'
+      - 'capacitor.studio.config.json'
+      - '.github/workflows/android-studio-apk.yml'
+
+concurrency:
+  group: nexora-viewer-apk-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-apk:
