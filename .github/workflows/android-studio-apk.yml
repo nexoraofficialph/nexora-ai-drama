@@ -9,6 +9,10 @@ on:
       - 'capacitor.studio.config.json'
       - '.github/workflows/android-studio-apk.yml'
 
+concurrency:
+  group: nexora-studio-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-studio-apk:
     runs-on: ubuntu-latest
