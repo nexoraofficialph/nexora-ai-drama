@@ -1,0 +1,8 @@
+{
+  "name": "NEXORA STUDIO",
+  "short_name": "NEXORA STUDIO",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#09090e",
+  "theme_color": "#09090e"
+}
