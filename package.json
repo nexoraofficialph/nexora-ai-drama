@@ -7,13 +7,16 @@
     "start": "npx serve .",
     "build": "echo \"Static web app ready for Capacitor\"",
     "cap:sync": "cap sync",
-    "cap:open:android": "cap open android"
+    "cap:open:android": "cap open android",
+    "assets:android": "node scripts/generate-assets.cjs && npx capacitor-assets generate --android"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",
     "@capacitor/android": "^7.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3"
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/assets": "^3.0.5",
+    "sharp": "^0.33.5"
   }
 }
