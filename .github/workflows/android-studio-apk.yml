@@ -7,6 +7,9 @@ on:
     paths:
       - 'studio/**'
       - 'capacitor.studio.config.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'scripts/**'
       - '.github/workflows/android-studio-apk.yml'
 
 concurrency:
@@ -39,6 +42,10 @@ jobs:
           cp studio/manifest.webmanifest www/manifest.webmanifest
           cp studio/icon.svg www/icon.svg
           cp studio/icon.svg app-icon.png
+          test -s www/index.html
+          test -s www/manifest.webmanifest
+          test -s www/icon.svg
+          test -s app-icon.png
       - name: Switch to Studio native config
         run: cp capacitor.studio.config.json capacitor.config.json
       - name: Sync Android Studio app
