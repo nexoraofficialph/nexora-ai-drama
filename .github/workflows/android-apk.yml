@@ -34,6 +34,14 @@ jobs:
       - name: Install project dependencies
         run: npm install
 
+      - name: Export generated npm lockfile for reproducibility
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-generated-npm-lockfile
+          path: package-lock.json
+          retention-days: 7
+
       - name: Validate inline scripts and Firebase account wiring
         run: node scripts/validate-web.cjs
 
