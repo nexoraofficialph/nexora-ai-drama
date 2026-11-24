@@ -23,8 +23,10 @@ for(const [label,needle] of assertions)if(!functions.includes(needle))throw new 
 if(!rules.includes("allow write: if false"))throw new Error("Firestore rules missing client write denial");
 for(const path of ["wallet/{docId}","orders/{orderId}","ledger/{entryId}","episodeUnlocks/{unlockId}","paymentOrders/{orderId}"])if(!rules.includes(path))throw new Error("Firestore rules missing protected path "+path);
 if(!html.includes("async function nxStartCheckout(packageId)")||!html.includes("Checkout is paused"))throw new Error("Checkout pause state not clearly guarded in app");
-const rejectionBranch=functions.slice(functions.indexOf("if(claimId)"),functions.indexOf("tx.update(orderRef",functions.indexOf("if(claimId)")));
-if(!rejectionBranch.includes("trim().toUpperCase().replace("))throw new Error("Payment-reference claim release normalization mismatch");
+const claimReleaseStart=functions.indexOf("const claimId=order.paymentReference");
+const rejectionBranch=functions.slice(claimReleaseStart,functions.indexOf("tx.update(orderRef",claimReleaseStart));
+if(claimReleaseStart<0||!rejectionBranch.includes("trim().toUpperCase().replace("))throw new Error("Payment-reference claim release normalization mismatch");
+
 
 
 
