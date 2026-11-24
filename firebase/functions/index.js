@@ -87,3 +87,30 @@ exports.adminVerifyPaymentAndCreditCoins = onCall(async (request) => {
   });
   return { orderId, decision, success: true };
 });
+
+// Secure coin debit and episode unlock: 10 coins, idempotent per drama/episode.
+exports.spendCoinsAndUnlockEpisode = onCall(async (request) => {
+  const uid = requireAuth(request);
+  const dramaKey = String(request.data?.dramaKey || "").trim();
+  const episodeNumber = Number(request.data?.episodeNumber);
+  if (!/^[a-zA-Z0-9_-]{1,80}$/.test(dramaKey)) throw new HttpsError("invalid-argument", "Invalid drama identifier.");
+  if (!Number.isInteger(episodeNumber) || episodeNumber < 6 || episodeNumber > 1000) throw new HttpsError("invalid-argument", "Episodes 1–5 are free; invalid paid episode.");
+  const unlockId = dramaKey + "_ep" + episodeNumber;
+  const userRef = db.collection("users").doc(uid);
+  const walletRef = userRef.collection("wallet").doc("balance");
+  const unlockRef = userRef.collection("episodeUnlocks").doc(unlockId);
+  const ledgerRef = userRef.collection("ledger").doc("unlock_" + unlockId);
+  const result = await db.runTransaction(async (tx) => {
+    const [unlockSnap, walletSnap, ledgerSnap] = await Promise.all([tx.get(unlockRef), tx.get(walletRef), tx.get(ledgerRef)]);
+    if (unlockSnap.exists) return { alreadyUnlocked: true, balance: Number(walletSnap.exists ? walletSnap.data().coins || 0 : 0) };
+    const balance = Number(walletSnap.exists ? walletSnap.data().coins || 0 : 0);
+    if (!Number.isSafeInteger(balance) || balance < 0) throw new HttpsError("failed-precondition", "Wallet balance is invalid.");
+    if (balance < 10) throw new HttpsError("failed-precondition", "Not enough verified coins.");
+    if (ledgerSnap.exists) throw new HttpsError("already-exists", "A ledger entry exists for this unlock.");
+    tx.set(walletRef, { coins: balance - 10, updatedAt: FieldValue.serverTimestamp() });
+    tx.create(unlockRef, { dramaKey, episodeNumber, coinsSpent: 10, unlockedAt: FieldValue.serverTimestamp() });
+    tx.create(ledgerRef, { type: "episode_unlock_debit", dramaKey, episodeNumber, coins: -10, balanceAfter: balance - 10, createdAt: FieldValue.serverTimestamp() });
+    return { alreadyUnlocked: false, balance: balance - 10 };
+  });
+  return { dramaKey, episodeNumber, coinsSpent: result.alreadyUnlocked ? 0 : 10, alreadyUnlocked: result.alreadyUnlocked, balance: result.balance };
+});
