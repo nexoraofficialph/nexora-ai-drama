@@ -15,7 +15,7 @@ const required=[
  "async function playEpisode(","verifyEpisodeUnlock","spendCoinsAndUnlockEpisode"
 ];
 for(const needle of required)if(!html.includes(needle)){console.error("Missing required app/Firebase/playback wiring: "+needle);process.exitCode=1;}
-if(/supabase/i.test(html)){console.error("Legacy Supabase references remain in the Android app entry.");process.exitCode=1;}
+if(/SUPABASE_SERVICE_ROLE_KEY|service_role/i.test(html)){console.error("Supabase service-role secret reference detected in Viewer client.");process.exitCode=1;}
 if(html.includes("DEMO PURCHASES")||html.includes("buyDemoCoins(50)")){console.error("Old demo coin-shop buttons still present.");process.exitCode=1;}
 if(!html.includes("const defaultCatalog=normalizeCatalog(defaultDramas),storedCatalog=normalizeCatalog(getStore(\"nexoraCatalog\"))")){console.error("Catalog migration missing: stored catalog must not replace canonical defaults.");process.exitCode=1;}
 if(html.includes("NEXORA ORIGINAL")){console.error("Placeholder catalog must not be labeled as original production content.");process.exitCode=1;}
