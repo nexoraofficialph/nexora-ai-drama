@@ -33,7 +33,9 @@ jobs:
           java-version: 21
       - name: Install dependencies
         run: npm install
-      - name: Validate Studio auth session safeguards\n        run: node scripts/validate-studio.cjs\n      - name: Switch to Studio native config before Android project creation
+      - name: Validate Studio auth session safeguards
+        run: node scripts/validate-studio.cjs
+      - name: Switch to Studio native config before Android project creation
         run: cp capacitor.studio.config.json capacitor.config.json
       - name: Generate Android project for Studio
         run: npx cap add android
