@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const required = [
+  'APP_VERSION',
   'index.html',
   'firebase-config.js',
   'firebase/payment-ui.js',
