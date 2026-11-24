@@ -1,42 +1,43 @@
-# NEXORA Direct Payments v1 — Setup
+# NEXORA AI DRAMA — Firebase Coin Wallet & Payment Status (11.12)
 
-**Current status:** Backend scaffolding committed. Not live, not wired to the in-app wallet UI, and not yet tested with PayMongo. Do not advertise or accept real payments until setup and tests are complete.
+## Current status: CHECKOUT DISABLED
 
-## Payment packages (editable in `supabase/functions/nx-create-checkout/index.ts`)
+The app is migrating to a Firebase-only account and wallet path. Coin checkout is intentionally disabled in the app (nxStartCheckout is a guard that returns a paused message). Do not accept or advertise real payments from the app at this time.
+
+- Firebase Authentication: email/password sign-in and sign-up.
+- Wallet balance and order history: Firestore read-only from the client.
+- Coin crediting: server-side Firebase callable only after an administrator verifies payment.
+- Episode unlocking: server-side 10-coin debit and unlock transaction, with server entitlement verification.
+- Payment methods: intended manual receiving methods are Maya and QR Ph only. GCash is not supported in the current code.
+- Receiver names and QR images are blank in firebase-config.js; no configured receiver means no usable checkout.
+- The firebase/payment-ui.js module is present but is not connected as the active checkout flow. Do not treat its UI as live.
+- Premium subscription billing and rewarded ads are not connected in release mode. Simulated ads and demo coins require explicit ?demo=1.
+
+## Backend callable functions
+
+firebase/functions/index.js includes:
+- createCoinOrder: server-defined coin packages and prices; authenticated user required.
+- submitPaymentReference: authenticated, pending-order-only reference submission; duplicate references are guarded.
+- adminVerifyPaymentAndCreditCoins: admin claim required; credit/rejection updates use a transaction and a purchase ledger.
+- spendCoinsAndUnlockEpisode: authenticated, transactionally debits 10 coins and creates the episode entitlement/ledger entry.
+- verifyEpisodeUnlock: server-authoritative entitlement check.
+
+Firestore client rules deny writes to wallet, orders, ledger, episode unlocks, and global payment orders. Users may only read their own protected records; My List writes are constrained to the signed-in user's own library document.
+
+## Required setup before enabling purchases
+
+1. Configure real Maya and QR Ph receiver display names and HTTPS QR image URLs in firebase-config.js (only after confirming the receiver accounts).
+2. Deploy and verify the current Firebase callable functions and Firestore rules.
+3. Ensure administrator accounts receive the Firebase custom claim admin: true through a trusted server/admin process. Never set this claim from the client.
+4. Add a real in-app checkout UI that creates an order, selects the payment method, submits the reference, and displays order state. Keep client-side wallet crediting disabled.
+5. Test successful payment, failed/rejected payment, duplicate references, concurrent verification, account switching, insufficient balance, repeated episode unlock, and cross-user entitlement checks with Firebase Emulator Suite or a test project.
+6. Test on a physical Android device. A successful APK build is not evidence of live payment or playback behavior.
+7. Only enable live checkout after the payment verification and test evidence are reviewed. Payment QR details, admin claim, Firebase deployment, and real transaction tests remain unverified.
+
+## Package amounts (server-defined)
+
 - Starter: 500 coins — PHP 49
 - Value: 1,200 coins — PHP 99
 - Premium: 3,000 coins — PHP 199
 
-## Required account setup
-1. Create/activate a PayMongo merchant account and complete its required verification.
-2. In PayMongo Dashboard, enable GCash, Maya, and QR Ph where eligible. Individual account capability may be limited to QR Ph; GCash/Maya may require an approved registered business profile.
-3. Create Supabase project and configure app's `supabase-config.js` with its URL and publishable/anon key. This repo's config currently has placeholders.
-4. Run migrations in order: `202611240001_direct_payments.sql`, then `202611240002_payment_fulfillment_hardening.sql` in the Supabase SQL editor. The second migration validates paid amount/currency and deduplicates credits by provider payment ID.
-5. Deploy Edge Functions:
-   ```sh
-   supabase functions deploy nx-create-checkout
-   supabase functions deploy nx-paymongo-webhook --no-verify-jwt
-   ```
-6. Set function secrets (never commit them):
-   ```sh
-   supabase secrets set PAYMONGO_SECRET_KEY=sk_test_...
-   supabase secrets set PAYMONGO_WEBHOOK_SECRET=whsk_...
-   supabase secrets set PAYMONGO_MODE=test
-   supabase secrets set SUPABASE_SERVICE_ROLE_KEY=...
-   ```
-   The Supabase platform provides SUPABASE_URL and SUPABASE_ANON_KEY to deployed functions; ensure service role is set securely.
-7. Register PayMongo webhook endpoint to the deployed `nx-paymongo-webhook` URL and subscribe to `checkout_session.payment.paid`. Use a **test webhook secret** with test keys; configure live separately.
-8. Verify signature validation and duplicate-event handling in test mode, then test: success, cancellation, failed payment, replayed webhook, concurrent duplicate, wrong amount, expired QR, and no logged-in user.
-9. Add frontend coin store buttons to call `nx-create-checkout` with authenticated Supabase session, open returned `checkoutUrl`, and reload wallet balance after verified payment. Never credit coins from client redirect/success screens.
-10. Before live: audit the RPC and policies, test payment amounts/reference validation, refund/reversal policy, payment provider account capabilities, and test with real devices.
-11. The app coin store is wired to the `nx-create-checkout` Edge Function. Sign-in is required; a checkout redirect does not credit coins. Use the Refresh wallet/status button after payment while webhook processing is confirmed.
-
-## Payment behavior
-- The Edge Function authenticates the Supabase user and accepts only server-defined package IDs. Price/coin values cannot be client-specified.
-- Payment creation writes a pending order before requesting checkout.
-- Webhook signature is verified using the raw request body before processing.
-- Coin credit is server-side through an RPC and ledger reference. Repeated callbacks for a paid order are idempotent.
-- Client-facing success redirect is not proof of payment; webhook is the source of truth.
-
-## Current limitation
-The existing app uses Supabase and its Supabase configuration is placeholder-only. No Firebase coin system exists in the inspected repo. These files create the Supabase-based payment backend, but they do not yet add the coin-store UI or wallet balance display in the app, and no Supabase deployment/payment tests have run.
+These package definitions exist in backend code, but checkout is paused and no live payment provider integration is connected.
