@@ -21,6 +21,7 @@ if(!html.includes("const dramaIndex=selectedDrama,episodeIndex=n,request=++nxPla
 if(!html.includes("seq=nxListSyncSeq,keys=saved.map")||!html.includes("seq!==nxListSyncSeq)return null")){console.error("Stale queued My List upload guard missing.");process.exitCode=1;}
 if(!html.includes('v.removeAttribute("src");v.load();v.classList.remove("nx-switching")')||!html.includes('This episode has no video source configured yet.')){console.error("Missing-source player must stop cleanly without retrying.");process.exitCode=1;}
 if(!html.includes("for(let n=0;n<d.episodes;n++){const b=document.createElement(\"button\")")){console.error("Episode picker must render all episodes, not truncate at 12.");process.exitCode=1;}
+if(!html.includes('bal.textContent=NX_DEMO_MEDIA_MODE?nxCoins:"—"')||!html.includes('demoAd.style.display=NX_DEMO_MEDIA_MODE?"":"none"')){console.error("Release wallet must not expose demo balance or demo ad button.");process.exitCode=1;}
 const declared=new Set([...html.matchAll(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m=>m[1]));
 const handlers=[...html.matchAll(/onclick\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
 const called=new Set();
