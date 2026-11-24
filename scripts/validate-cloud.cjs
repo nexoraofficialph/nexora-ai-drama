@@ -20,7 +20,7 @@ const checks=[
  ['Studio login requires email and password only',studio.includes('id="loginEmail"')&&studio.includes('id="loginPassword"')&&!studio.includes('id="loginProjectUrl"')&&!studio.includes('id="loginPublishableKey"')],
  ['Studio Supabase config reads bundled config',studio.includes('window.NEXORA_SUPABASE_CONFIG')],
  ['Studio APK workflow copies Supabase config',fs.existsSync('.github/workflows/android-studio-apk.yml')&&fs.readFileSync('.github/workflows/android-studio-apk.yml','utf8').includes('cp supabase-config.js www/supabase-config.js')],
- ['Cloud drama IDs filtered to UUIDs before REST query',viewer.includes("cloudDramas.map(d=>d.id).filter(id=>typeof id")&&viewer.includes("filter(id=>typeof id==='string'"))],
+ ['Cloud drama IDs filtered to UUIDs before REST query',viewer.includes("cloudDramas.map(d=>d.id).filter(id=>typeof id")&&viewer.includes("filter(id=>typeof id==='string'")],
  ['Published cloud records update existing catalog entries',viewer.includes('const cloudRecord={id:cid')&&viewer.includes('if(existing>=0)dramas[existing]=cloudRecord;else dramas.push(cloudRecord)'],
  ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
 ];
