@@ -54,7 +54,7 @@ exports.submitPaymentReference = onCall(async (request) => {
     if (claimSnap.exists) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
     const duplicateQuery = db.collection("paymentOrders").where("paymentReference", "==", reference);
     const duplicateSnap = await tx.get(duplicateQuery);
-    if (duplicateSnap.docs.some(doc => doc.data().paymentMethod === method)) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
+    if (duplicateSnap.docs.some(doc => doc.data().paymentMethod === method && doc.data().status !== "rejected")) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
     tx.create(referenceClaimRef, { method, normalizedReference, orderId, userId: uid, claimedAt: FieldValue.serverTimestamp() });
     tx.update(orderRef, { paymentMethod: method, paymentReference: reference, status: "pending_verification", submittedAt: FieldValue.serverTimestamp() });
     tx.update(userOrderRef, { paymentMethod: method, paymentReference: reference, status: "pending_verification", submittedAt: FieldValue.serverTimestamp() });
@@ -80,7 +80,7 @@ exports.adminVerifyPaymentAndCreditCoins = onCall(async (request) => {
     const ledgerRef = db.collection("users").doc(userId).collection("ledger").doc(orderId);
     const userOrderRef = db.collection("users").doc(userId).collection("orders").doc(orderId);
     if (decision === "reject") {
-      const claimId=order.paymentMethod&&order.paymentReference?crypto.createHash("sha256").update(order.paymentMethod+":"+String(order.paymentReference).trim().toUpperCase().replace(/\\s+/g," ")).digest("hex"):null;
+      const claimId=order.paymentMethod&&order.paymentReference?crypto.createHash("sha256").update(order.paymentMethod+":"+String(order.paymentReference).trim().toUpperCase().replace(/\s+/g," ")).digest("hex"):null;
       if(claimId){const claimRef=db.collection("paymentReferenceClaims").doc(claimId);const claimSnap=await tx.get(claimRef);if(claimSnap.exists&&claimSnap.data().orderId===orderId)tx.delete(claimRef);}
       tx.update(orderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
       tx.update(userOrderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
