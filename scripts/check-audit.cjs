@@ -1,5 +1,5 @@
 const fs=require("node:fs");
-const path="npm-audit-report.json";
+const path=process.argv[2]||"npm-audit-report.json";
 if(!fs.existsSync(path))throw new Error("npm audit report is missing");
 let report;
 try{report=JSON.parse(fs.readFileSync(path,"utf8"));}catch(e){throw new Error("npm audit output is not valid JSON: "+e.message);}
