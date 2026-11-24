@@ -21,6 +21,7 @@ const assertions=[
 ];
 for(const [label,needle] of assertions)if(!functions.includes(needle))throw new Error("Firebase invariant missing: "+label+" ("+needle+")");
 if(!rules.includes("allow write: if false"))throw new Error("Firestore rules missing client write denial");
+if(!rules.includes("request.resource.data.updatedAt is timestamp"))throw new Error("My List rules must validate server timestamp type");
 for(const path of ["wallet/{docId}","orders/{orderId}","ledger/{entryId}","episodeUnlocks/{unlockId}","paymentOrders/{orderId}"])if(!rules.includes(path))throw new Error("Firestore rules missing protected path "+path);
 if(!html.includes("async function nxStartCheckout(packageId)")||!html.includes("Checkout is paused"))throw new Error("Checkout pause state not clearly guarded in app");
 const claimReleaseStart=functions.indexOf("const claimId=order.paymentReference");
