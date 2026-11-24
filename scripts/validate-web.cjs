@@ -62,5 +62,6 @@ if(!paymentUi.includes('const creatingUid=window.nxFirebaseAuth.currentUser?.uid
   process.exitCode=1;
 }
 
+if(!html.includes('getStore("nexoraWatchProgress:guest")')||!html.includes('nexoraWatchProgress:"+nxProgressScope')||!html.includes('nxProgressScope=nextScope')){console.error("Watch progress must be isolated per Firebase account.");process.exitCode=1;}
 if(process.exitCode)process.exit(process.exitCode);
 console.log("Web validation passed: "+scripts.length+" inline scripts syntax-checked; "+handlers.length+" click handlers checked; duplicate IDs checked; Firebase auth/My List/wallet and server-verified episode unlock wiring checked; legacy Supabase references blocked.");
