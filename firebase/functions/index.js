@@ -42,7 +42,7 @@ exports.submitPaymentReference = onCall(async (request) => {
   const method = String(request.data?.method || "");
   if (!orderId || reference.length < 4) throw new HttpsError("invalid-argument", "Enter a valid payment reference.");
   if (!["maya", "qrph"].includes(method)) throw new HttpsError("invalid-argument", "Unsupported payment method.");
-  const referenceClaimId = crypto.createHash("sha256").update(method + ":" + normalizedReference).digest("hex");
+  const referenceClaimId = crypto.createHash("sha256").update(normalizedReference).digest("hex");
   const referenceClaimRef = db.collection("paymentReferenceClaims").doc(referenceClaimId);
   const orderRef = db.collection("paymentOrders").doc(orderId);
   const userOrderRef = db.collection("users").doc(uid).collection("orders").doc(orderId);
@@ -80,8 +80,7 @@ exports.adminVerifyPaymentAndCreditCoins = onCall(async (request) => {
     const ledgerRef = db.collection("users").doc(userId).collection("ledger").doc(orderId);
     const userOrderRef = db.collection("users").doc(userId).collection("orders").doc(orderId);
     if (decision === "reject") {
-      const claimId=order.paymentMethod&&order.paymentReference?crypto.createHash("sha256").update(order.paymentMethod+":"+String(order.paymentReference).trim().toUpperCase().replace(/\s+/g," ")).digest("hex"):null;
-      if(claimId){const claimRef=db.collection("paymentReferenceClaims").doc(claimId);const claimSnap=await tx.get(claimRef);if(claimSnap.exists&&claimSnap.data().orderId===orderId)tx.delete(claimRef);}
+      const claimId=order.paymentReference?crypto.createHash("sha256").update(String(order.paymentReference).trim().toUpperCase().replace(/\\s+/g," ")).digest("hex"):null;\n      if(claimId){const claimRef=db.collection("paymentReferenceClaims").doc(claimId);const claimSnap=await tx.get(claimRef);if(claimSnap.exists&&claimSnap.data().orderId===orderId)tx.delete(claimRef);}
       tx.update(orderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
       tx.update(userOrderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
       return;
