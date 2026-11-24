@@ -1,7 +1,7 @@
 /* NEXORA 11.1 Firebase payment UI — manual Maya/QR Ph verification, no GCash */
 (function(){
  const packs={starter:{coins:500,price:49},value:{coins:1200,price:99},premium:{coins:3000,price:199}};
- let currentOrder=null, paymentMethod="maya";
+ let currentOrder=null,currentOrderUid=null,paymentMethod="maya";
  const config=window.NEXORA_PAYMENT_DETAILS||{};
  function el(tag,attrs={},children=[]){const n=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>{if(k==="text")n.textContent=v;else if(k==="html")n.innerHTML=v;else n.setAttribute(k,v)});children.forEach(c=>n.append(c));return n;}
  function toastMsg(m){if(typeof window.toast==="function")window.toast(m);else console.info("[NEXORA]",m);}
@@ -28,7 +28,7 @@
   if(!paymentConfigured(paymentMethod)){if(paymentConfigured("qrph"))paymentMethod="qrph";else if(paymentConfigured("maya"))paymentMethod="maya";else{status("Maya and QR Ph receiver details/QR images are not configured. No order was created.");toastMsg("Payments are disabled until the real payment QR details are configured.");return;}}
   if(!window.nxFirebaseAuth.currentUser){firebaseAuthForm(()=>startOrder(packageId));return;}
   status("Creating payment order…");
-  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;paymentMethod=paymentConfigured("maya")?"maya":"qrph";showPayment();}
+  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;currentOrderUid=window.nxFirebaseAuth.currentUser?.uid||null;paymentMethod=paymentConfigured("maya")?"maya":"qrph";showPayment();}
   catch(e){console.error("NEXORA createCoinOrder error",e);status("Could not create order. Try again.");toastMsg("Order creation failed.");}
  }
  function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
@@ -48,7 +48,7 @@
  }
  let nxPaymentSubmitting=false;async function submitReference(){
   const input=modal().querySelector("#nxPayReference"),submit=modal().querySelector("#nxPaySubmitRef"),ref=input.value.trim(),msg=modal().querySelector("#nxPaySubmitStatus"),orderId=currentOrder?.orderId,method=paymentMethod;
-  if(nxPaymentSubmitting)return;if(!orderId){msg.textContent="No active order. Create a new order first.";return;}
+  if(nxPaymentSubmitting)return;if(!orderId){msg.textContent="No active order. Create a new order first.";return;}if(!currentOrderUid||window.nxFirebaseAuth.currentUser?.uid!==currentOrderUid){currentOrder=null;currentOrderUid=null;msg.textContent="Account changed. Create a new payment order after signing in.";if(submit)submit.disabled=true;status("Payment order belongs to a previous account. Start a new order.");return;}
   if(ref.length<4){msg.textContent="Please enter your payment reference.";return;}
   nxPaymentSubmitting=true;if(submit)submit.disabled=true;const mayaBtn=modal().querySelector("#nxMethodMaya"),qrBtn=modal().querySelector("#nxMethodQr");if(mayaBtn)mayaBtn.disabled=true;if(qrBtn)qrBtn.disabled=true;
   msg.textContent="Submitting reference…";
