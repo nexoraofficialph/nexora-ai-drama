@@ -48,5 +48,13 @@ if(!html.includes('Premium membership is not yet connected to live billing') ||
   process.exitCode=1;
 }
 
+
+if(!html.includes('currentOrderUid=window.nxFirebaseAuth.currentUser?.uid||null') ||
+   !html.includes('window.nxFirebaseAuth.currentUser?.uid!==currentOrderUid') ||
+   !html.includes('Payment order belongs to a previous account')) {
+  console.error("Payment orders must be bound to their creating account and blocked after account switching.");
+  process.exitCode=1;
+}
+
 if(process.exitCode)process.exit(process.exitCode);
 console.log("Web validation passed: "+scripts.length+" inline scripts syntax-checked; "+handlers.length+" click handlers checked; duplicate IDs checked; Firebase auth/My List/wallet and server-verified episode unlock wiring checked; legacy Supabase references blocked.");
