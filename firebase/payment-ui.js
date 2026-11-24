@@ -28,7 +28,9 @@
   if(!paymentConfigured(paymentMethod)){if(paymentConfigured("qrph"))paymentMethod="qrph";else if(paymentConfigured("maya"))paymentMethod="maya";else{status("Maya and QR Ph receiver details/QR images are not configured. No order was created.");toastMsg("Payments are disabled until the real payment QR details are configured.");return;}}
   if(!window.nxFirebaseAuth.currentUser){firebaseAuthForm(()=>startOrder(packageId));return;}
   status("Creating payment order…");
-  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;currentOrderUid=window.nxFirebaseAuth.currentUser?.uid||null;paymentMethod=paymentConfigured("maya")?"maya":"qrph";showPayment();}
+  const creatingUid=window.nxFirebaseAuth.currentUser?.uid||null;
+  if(!creatingUid){status("Sign in before creating a payment order.");return;}
+  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});if(window.nxFirebaseAuth.currentUser?.uid!==creatingUid){currentOrder=null;currentOrderUid=null;status("Account changed while the order was being created. Sign in again and start a new order.");toastMsg("Order cancelled because the account changed.");return;}currentOrder=res.data;currentOrderUid=creatingUid;paymentMethod=paymentConfigured("maya")?"maya":"qrph";showPayment();}
   catch(e){console.error("NEXORA createCoinOrder error",e);status("Could not create order. Try again.");toastMsg("Order creation failed.");}
  }
  function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
