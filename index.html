@@ -158,4 +158,5 @@ if ("serviceWorker" in navigator) {
 <script>
 (()=>{const el=document.getElementById('nexora-splash');if(!el)return;const status=document.getElementById('nx-splash-status');const labels=['Preparing your experience','Loading drama catalog','Setting the scene','Almost ready'];let idx=0;const start=performance.now();const cycle=()=>{if(!el.isConnected)return;if(status)status.textContent=labels[idx++%labels.length];};cycle();const loop=setInterval(cycle,650);const dismiss=()=>{setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),600);clearInterval(loop)},Math.max(450,1900-(performance.now()-start)));};if(document.readyState==='complete')dismiss();else window.addEventListener('load',dismiss,{once:true});})();
 </script>
+<script src="./firebase/payment-ui.js"></script>
 </body></html>
