@@ -4,7 +4,7 @@ for(const [label,html] of [['Studio',studio],['Viewer',viewer]]){const scripts=[
 const checks=[
  ['Studio HTTPS source input',studio.includes('id="episodeVideoUrl"')],
  ['Studio cloud publishing function',studio.includes('function publishStudioCatalog()')],
- ['Admin membership validation',studio.includes('/rest/v1/studio_admins?select=user_id')],
+ ['Owner membership verified against the exact Supabase user ID',studio.includes('async function verifyStudioOwner(session)')&&studio.includes('/rest/v1/studio_admins?user_id=eq.')&&studio.includes('await verifyStudioOwner(candidate)')],
  ['Private video upload handler',studio.includes('function uploadCloudVideo()')],
  ['Upload links to episode row',studio.includes('episode_id:cloudEpisode.id')],
  ['Upload size limit 50 MB',studio.includes('50*1024*1024')],
