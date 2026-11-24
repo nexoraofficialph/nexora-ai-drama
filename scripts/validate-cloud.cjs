@@ -1,5 +1,6 @@
-const fs=require('node:fs');
+const fs=require('node:fs'),vm=require('node:vm');
 const studio=fs.readFileSync('studio/index.html','utf8'),viewer=fs.readFileSync('index.html','utf8'),config=fs.readFileSync('supabase-config.js','utf8'),sql=fs.readFileSync('supabase/live_cloud_v1.sql','utf8'),prep=fs.readFileSync('scripts/prepare-web.cjs','utf8');
+for(const [label,html] of [['Studio',studio],['Viewer',viewer]]){const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());if(!scripts.length)throw new Error(label+' has no inline scripts');scripts.forEach((source,index)=>{try{new vm.Script(source,{filename:label+' inline script '+(index+1)});}catch(err){console.error(label+' script syntax error:',err.stack);process.exit(1);}});console.log('PASS '+label+' inline script syntax');}
 const checks=[
  ['Studio HTTPS source input',studio.includes('id="episodeVideoUrl"')],
  ['Studio cloud publishing function',studio.includes('function publishStudioCatalog()')],
