@@ -46,11 +46,12 @@
   const submit=modal().querySelector("#nxPaySubmitRef");if(submit)submit.onclick=submitReference;
  }
  async function submitReference(){
-  const ref=modal().querySelector("#nxPayReference").value.trim(),msg=modal().querySelector("#nxPaySubmitStatus");
+  const input=modal().querySelector("#nxPayReference"),submit=modal().querySelector("#nxPaySubmitRef"),ref=input.value.trim(),msg=modal().querySelector("#nxPaySubmitStatus");
   if(ref.length<4){msg.textContent="Please enter your payment reference.";return;}
+  if(submit)submit.disabled=true;
   msg.textContent="Submitting reference…";
-  try{const call=window.nxFirebaseFunctions.httpsCallable("submitPaymentReference");await call({orderId:currentOrder.orderId,reference:ref,method:paymentMethod});msg.textContent="Submitted. Coins will be added after manual payment verification.";status("Payment submitted for verification · Order "+currentOrder.orderId);toastMsg("Payment reference submitted.");}
-  catch(e){console.error("NEXORA payment reference error",e);msg.textContent=e.message||"Could not submit reference. Please retry.";}
+  try{const call=window.nxFirebaseFunctions.httpsCallable("submitPaymentReference");await call({orderId:currentOrder.orderId,reference:ref,method:paymentMethod});msg.textContent="Submitted. Coins will be added after manual payment verification.";if(input)input.disabled=true;if(submit)submit.textContent="Reference submitted";status("Payment submitted for verification · Order "+currentOrder.orderId);toastMsg("Payment reference submitted.");}
+  catch(e){console.error("NEXORA payment reference error",e);msg.textContent=e.message||"Could not submit reference. Please retry.";if(submit)submit.disabled=false;}
  }
  // Override old Supabase direct-checkout buttons so users cannot be sent to a missing gateway.
  window.nxStartCheckout=startOrder;
