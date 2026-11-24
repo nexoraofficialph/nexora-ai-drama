@@ -8,6 +8,7 @@ const required = [
   'supabase-config.js',
   'firebase-config.js',
   'firebase/payment-ui.js',
+  'google-services.json',
   'manifest.webmanifest',
   'icon.svg',
   'app-icon.png',
