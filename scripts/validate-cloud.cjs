@@ -14,6 +14,9 @@ const checks=[
  ['Private Storage bucket',sql.includes("values ('nexora-videos','nexora-videos',false")],
  ['Admin-only Storage upload policy',sql.includes('NEXORA admins upload videos')&&sql.includes('public.studio_admins')],
  ['Android copies Supabase config',prep.includes('supabase-config.js')],
+ ['Studio auth refresh implementation',studio.includes('function refreshStudioAuth()')],
+ ['Cloud requests proactively refresh expiring tokens',studio.includes('Date.now()>=session.expires_at-60000')],
+ ['Cloud requests retry once after unauthorized',studio.includes('res.status===401&&retryAuth')],
  ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
 ];
 for(const [label,ok] of checks)console.log((ok?'PASS':'FAIL')+' '+label);
