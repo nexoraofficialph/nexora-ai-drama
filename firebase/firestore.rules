@@ -17,6 +17,10 @@ service cloud.firestore {
         allow read: if signedIn() && request.auth.uid == userId;
         allow write: if false;
       }
+      match /episodeUnlocks/{unlockId} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow write: if false;
+      }
     }
     match /paymentOrders/{orderId} {
       allow read: if signedIn() && resource.data.userId == request.auth.uid;
