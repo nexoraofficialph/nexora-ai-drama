@@ -24,7 +24,7 @@ const checks=[
  ['Studio APK workflow copies bundled Supabase config',studioWorkflow.includes('cp studio/supabase-config.js www/supabase-config.js')&&studioWorkflow.includes('test -s www/supabase-config.js')],
  ['Cloud drama IDs filtered to UUIDs before REST query',viewer.includes("cloudDramas.map(d=>d.id).filter(id=>typeof id")&&viewer.includes("filter(id=>typeof id==='string'")],
  ['Published cloud records update existing catalog entries',viewer.includes('const cloudRecord={id:cid')&&viewer.includes('if(existing>=0)dramas[existing]=cloudRecord;else dramas.push(cloudRecord)')],
- ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
+ ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')],
  ['Private playback function limits to published episode and drama',playback.includes('status: "eq.published"')&&playback.includes('/storage/v1/object/sign/')],
  ['Viewer requests signed playback URLs for private episodes',viewer.includes('/functions/v1/nx-playback-url')&&viewer.includes('nexora-private://')],
  ['Studio publishes episodes backed by private uploaded assets',studio.includes('cloudAssets.find(a=>a.episode_id===cloudEpisode.id')&&studio.includes("privateAsset?'nexora-private://'")],
