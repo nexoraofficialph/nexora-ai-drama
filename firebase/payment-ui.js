@@ -74,7 +74,7 @@
  status("Firebase verified wallet: "+balance.toLocaleString()+" coins · server ledger wallet (demo balance is separate).");const rows=ordersSnap.docs.map(d=>({orderId:d.id,...d.data()}));renderFirebaseOrders(rows,balance);
  }catch(e){console.error("NEXORA Firebase wallet refresh error",e);status("Wallet refresh failed. Check Firebase configuration and Firestore rules.");if(historyEl)historyEl.textContent="Unable to load Firebase orders.";} }
  window.nxRefreshWallet=nxRefreshFirebaseWallet;
- if(window.nxFirebaseAuth){window.nxFirebaseAuth.onAuthStateChanged(user=>{if(user){status("Firebase signed in · refreshing secure wallet…");nxRefreshFirebaseWallet();}else{status("Sign in to Firebase to view wallet/order history.");const h=document.getElementById("nxWalletHistory");if(h)h.textContent="Firebase sign-in is required for order history.";}});}
- // Replace Firebase auth modal copy with a clear warning that it is currently separate from app/Supabase login.
+ // The main viewer auth-state listener owns wallet refreshes; do not register a second listener here.
+ // Avoid duplicate wallet reads/rendering and competing status messages during sign-in/sign-out.
 
 })();
