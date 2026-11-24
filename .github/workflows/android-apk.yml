@@ -40,6 +40,12 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
+      - name: Install and validate Firebase Android configuration
+        run: |
+          node -e "const c=require('./google-services.json'); const clients=c.client||[]; if(c.project_info?.project_id!=='nexora-ai-drama'||!clients.some(x=>x.client_info?.android_client_info?.package_name==='com.nexorastudio.aidrama')) process.exit(1); console.log('Firebase Android config matches NEXORA AI DRAMA.');"
+          install -D google-services.json android/app/google-services.json
+          test -s android/app/google-services.json
+
       - name: Generate native launcher and splash assets
         run: npm run assets:android
 
