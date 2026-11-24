@@ -10,7 +10,8 @@
     "cap:open:android": "cap open android",
     "assets:android": "node scripts/generate-assets.cjs && npx capacitor-assets generate --android",
     "prepare:web": "node scripts/prepare-web.cjs",
-    "validate:source": "node scripts/check-source-assets.cjs"
+    "validate:source": "node scripts/check-source-assets.cjs",
+    "validate:firebase": "node scripts/validate-firebase.cjs"
   },
   "dependencies": {
     "@capacitor/core": "^7.4.3",
