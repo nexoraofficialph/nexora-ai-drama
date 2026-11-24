@@ -30,7 +30,7 @@ exports.createCoinOrder = onCall(async (request) => {
     tx.create(userOrderRef, { packageId, coins: pack.coins, pricePhp: pack.pricePhp,
       status: "awaiting_payment", createdAt: now });
   });
-  return { orderId: orderRef.id, coins: pack.coins, amountPhp: pack.pricePhp, status: "awaiting_payment" };
+  return { orderId: orderRef.id, packageId, coins: pack.coins, amountPhp: pack.pricePhp, status: "awaiting_payment" };
 });
 
 exports.submitPaymentReference = onCall(async (request) => {
