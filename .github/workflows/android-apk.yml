@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -34,13 +34,6 @@ jobs:
       - name: Install project dependencies
         run: npm install
 
-      - name: Export generated npm lockfile for reproducibility
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: nexora-generated-npm-lockfile
-          path: package-lock.json
-          retention-days: 7
 
       - name: Validate inline scripts and Firebase account wiring
         run: node scripts/validate-web.cjs
@@ -50,10 +43,29 @@ jobs:
           node --check firebase/functions/index.js
           npm run validate:firebase
 
-      - name: Capture dependency audit report
+      - name: Capture root dependency audit report
         run: npm audit --json > npm-audit-report.json || true
+
+      - name: Install Firebase Functions dependencies
+        run: npm install
+        working-directory: firebase/functions
+
+      - name: Capture Firebase Functions dependency audit report
+        run: npm audit --json > npm-audit-report.json || true
+        working-directory: firebase/functions
+
       - name: Fail build on known npm vulnerabilities
-        run: node scripts/check-audit.cjs
+        run: node scripts/check-audit.cjs && node scripts/check-audit.cjs firebase/functions/npm-audit-report.json
+
+      - name: Export generated npm lockfiles for reproducibility
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-generated-npm-lockfiles
+          path: |
+            package-lock.json
+            firebase/functions/package-lock.json
+          retention-days: 7
 
       - name: Generate Android project
         run: npx cap add android
@@ -91,12 +103,14 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug
 
-      - name: Upload dependency audit report
+      - name: Upload dependency audit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nexora-ai-drama-dependency-audit
-          path: npm-audit-report.json
+          name: nexora-ai-drama-dependency-audits
+          path: |
+            npm-audit-report.json
+            firebase/functions/npm-audit-report.json
           retention-days: 14
 
       - name: Upload APK artifact
