@@ -23,4 +23,5 @@ for(const [label,needle] of assertions)if(!functions.includes(needle))throw new 
 if(!rules.includes("allow write: if false"))throw new Error("Firestore rules missing client write denial");
 for(const path of ["wallet/{docId}","orders/{orderId}","ledger/{entryId}","episodeUnlocks/{unlockId}","paymentOrders/{orderId}"])if(!rules.includes(path))throw new Error("Firestore rules missing protected path "+path);
 if(!html.includes("async function nxStartCheckout(packageId)")||!html.includes("Checkout is paused"))throw new Error("Checkout pause state not clearly guarded in app");
+if(functions.includes("\\n      if(claimId)"))throw new Error("Malformed escaped newline in payment claim rejection branch");
 console.log("Firebase static audit passed: callable handlers, auth checks, payment reference protections, admin verification, ledger idempotency, episode unlock transactions, and client write-deny rules.");
