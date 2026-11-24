@@ -28,6 +28,8 @@ jobs:
         run: |
           node --check scripts/generate-assets.cjs
           node --check scripts/prepare-web.cjs
+          node --check firebase/payment-ui.js
+          node --check firebase/functions/index.js
           node scripts/check-inline-js.cjs index.html
           npm run validate:source
       - name: Create Android platform
