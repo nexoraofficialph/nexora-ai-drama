@@ -8,6 +8,7 @@ service cloud.firestore {
       match /private/library {
         allow read: if signedIn() && request.auth.uid == userId;
         allow write: if signedIn() && request.auth.uid == userId
+          && request.resource.data.keys().hasAll(['savedDramaKeys', 'updatedAt'])
           && request.resource.data.keys().hasOnly(['savedDramaKeys', 'updatedAt'])
           && request.resource.data.savedDramaKeys is list
           && request.resource.data.savedDramaKeys.size() <= 500;
