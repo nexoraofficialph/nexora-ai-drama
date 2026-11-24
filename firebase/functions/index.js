@@ -38,7 +38,7 @@ exports.submitPaymentReference = onCall(async (request) => {
   const uid = requireAuth(request);
   const orderId = String(request.data?.orderId || "");
   const reference = String(request.data?.reference || "").trim().slice(0, 100);
-  const normalizedReference = reference.toUpperCase().replace(/\\s+/g, " ");
+  const normalizedReference = reference.toUpperCase().replace(/\s+/g, " ");
   const method = String(request.data?.method || "");
   if (!orderId || reference.length < 4) throw new HttpsError("invalid-argument", "Enter a valid payment reference.");
   if (!["maya", "qrph"].includes(method)) throw new HttpsError("invalid-argument", "Unsupported payment method.");
