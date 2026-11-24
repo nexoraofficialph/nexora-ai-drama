@@ -9,7 +9,7 @@ const required=[
  "nxFirebaseAuth.signInWithEmailAndPassword","nxFirebaseAuth.createUserWithEmailAndPassword",
  "nxFirebaseAuth.sendPasswordResetEmail","nxFirebaseAuth.signOut()",
  "function cloudSyncList(","savedDramaKeys","nxRefreshWallet",
- "function playEpisode(","verifyEpisodeUnlock","spendCoinsAndUnlockEpisode"
+ "async function playEpisode(","verifyEpisodeUnlock","spendCoinsAndUnlockEpisode"
 ];
 for(const needle of required)if(!html.includes(needle)){console.error("Missing required app/Firebase/playback wiring: "+needle);process.exitCode=1;}
 if(/supabase/i.test(html)){console.error("Legacy Supabase references remain in the Android app entry.");process.exitCode=1;}
