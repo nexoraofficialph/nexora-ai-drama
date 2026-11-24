@@ -9,3 +9,12 @@ window.NEXORA_FIREBASE_CONFIG = {
   messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
   appId: "YOUR_FIREBASE_APP_ID"
 };
+
+
+// Payment display settings: replace with your actual Maya/QR Ph details and QR image URL.
+window.NEXORA_PAYMENT_DETAILS = {
+  mayaDisplayName: "",
+  mayaQrImageUrl: "",
+  qrPhDisplayName: "",
+  qrPhImageUrl: ""
+};
