@@ -29,11 +29,15 @@
   try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;paymentMethod="maya";showPayment();}
   catch(e){console.error("NEXORA createCoinOrder error",e);status("Could not create order. Try again.");toastMsg("Order creation failed.");}
  }
+ function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
  function showPayment(){
-  const p=packs[currentOrder.packageId];if(!p)return;
-  const imageUrl=paymentMethod==="maya"?config.mayaQrImageUrl:config.qrPhImageUrl;
-  const receiver=paymentMethod==="maya"?(config.mayaDisplayName||"Maya receiver not configured"):(config.qrPhDisplayName||"QR Ph receiver not configured");
-  const html='<h3>Order '+currentOrder.orderId+'</h3><p>Package: <b>'+p.coins.toLocaleString()+' coins</b> · Amount <b>₱'+p.price+'</b></p><div style="display:flex;gap:8px"><button id="nxMethodMaya" class="chip" style="flex:1">Maya</button><button id="nxMethodQr" class="chip" style="flex:1">QR Ph</button></div><div style="margin:12px 0;padding:12px;background:#22222b;border-radius:12px;text-align:center"><b>Pay to: '+receiver+'</b>'+(imageUrl?'<img src="'+imageUrl+'" alt="Payment QR" style="display:block;max-width:230px;width:100%;margin:12px auto;border-radius:8px">':'<p style="color:#f5a7b5;font-size:13px">Payment QR not yet configured. Owner must add the real payment QR image before users can pay.</p>')+'<p style="color:#aaa;font-size:12px">Do not pay until the correct receiver and QR are displayed.</p></div><label>Payment reference number</label><input id="nxPayReference" placeholder="Enter transaction reference" style="display:block;width:100%;padding:12px;background:#101018;border:1px solid #333;color:white;border-radius:9px;margin:8px 0"><button id="nxPaySubmitRef" class="btn" style="width:100%" '+(!imageUrl?'disabled':'')+'>Submit for verification</button><p id="nxPaySubmitStatus" style="color:#bbb;font-size:12px"></p>';
+  const pack=packs[currentOrder.packageId];if(!pack)return;
+  const rawUrl=paymentMethod==="maya"?config.mayaQrImageUrl:config.qrPhImageUrl;
+  const imageUrl=typeof rawUrl==="string"&&/^https:\/\/[^\s"'<>]+$/i.test(rawUrl)?rawUrl:"";
+  const rawReceiver=paymentMethod==="maya"?(config.mayaDisplayName||"Maya receiver not configured"):(config.qrPhDisplayName||"QR Ph receiver not configured");
+  const receiver=escapeHtml(rawReceiver);
+  const safeOrder=escapeHtml(currentOrder.orderId);
+  const html='<h3>Order '+safeOrder+'</h3><p>Package: <b>'+pack.coins.toLocaleString()+' coins</b> · Amount <b>₱'+pack.price+'</b></p><div style="display:flex;gap:8px"><button id="nxMethodMaya" class="chip" style="flex:1">Maya</button><button id="nxMethodQr" class="chip" style="flex:1">QR Ph</button></div><div style="margin:12px 0;padding:12px;background:#22222b;border-radius:12px;text-align:center"><b>Pay to: '+receiver+'</b>'+(imageUrl?'<img src="'+imageUrl+'" alt="Payment QR" style="display:block;max-width:230px;width:100%;margin:12px auto;border-radius:8px">':'<p style="color:#f5a7b5;font-size:13px">Payment QR not configured. Do not pay until the real QR image and receiver details are added.</p>')+'<p style="color:#aaa;font-size:12px">No GCash. Coins are credited only after payment is verified.</p></div><label>Payment reference number</label><input id="nxPayReference" placeholder="Enter transaction reference" style="display:block;width:100%;padding:12px;background:#101018;border:1px solid #333;color:white;border-radius:9px;margin:8px 0"><button id="nxPaySubmitRef" class="btn" style="width:100%" '+(!imageUrl?'disabled':'')+'>Submit for verification</button><p id="nxPaySubmitStatus" style="color:#bbb;font-size:12px"></p>';
   showContent(html);
   modal().querySelector("#nxMethodMaya").onclick=()=>{paymentMethod="maya";showPayment();};
   modal().querySelector("#nxMethodQr").onclick=()=>{paymentMethod="qrph";showPayment();};
