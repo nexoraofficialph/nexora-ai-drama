@@ -1,0 +1,58 @@
+/* NEXORA 11.1 Firebase payment UI — manual Maya/QR Ph verification, no GCash */
+(function(){
+ const packs={starter:{coins:500,price:49},value:{coins:1200,price:99},premium:{coins:3000,price:199}};
+ let currentOrder=null, paymentMethod="maya";
+ const config=window.NEXORA_PAYMENT_DETAILS||{};
+ function el(tag,attrs={},children=[]){const n=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>{if(k==="text")n.textContent=v;else if(k==="html")n.innerHTML=v;else n.setAttribute(k,v)});children.forEach(c=>n.append(c));return n;}
+ function toastMsg(m){if(typeof window.toast==="function")window.toast(m);else console.info("[NEXORA]",m);}
+ function ready(){return !!window.NX_FIREBASE_READY&&!!window.nxFirebaseFunctions&&!!window.nxFirebaseAuth;}
+ function getShop(){return document.getElementById("nxCoinShop");}
+ function ensureStatus(){let s=document.getElementById("nxPaymentStatus");if(!s){s=el("div",{id:"nxPaymentStatus","aria-live":"polite"});getShop()?.append(s);}return s;}
+ function status(m){const s=ensureStatus();if(s)s.textContent=m;}
+ function modal(){let m=document.getElementById("nxPayModal");if(!m){m=el("div",{id:"nxPayModal"});m.style.cssText="position:fixed;inset:0;z-index:9999;background:#000b;display:none;align-items:flex-end;justify-content:center;font-family:inherit;color:#f5f5f8";
+ const box=el("div");box.style.cssText="width:min(100%,540px);max-height:90vh;overflow:auto;background:#15151d;border:1px solid #383842;border-radius:20px 20px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom))";
+ const close=el("button",{text:"Close"});close.className="chip";close.style.cssText="float:right";close.onclick=()=>m.style.display="none";
+ box.append(close,el("h2",{text:"NEXORA Coin Payment"}),el("div",{id:"nxPayModalContent"}));m.append(box);document.body.append(m);}return m;}
+ function showContent(html){modal().querySelector("#nxPayModalContent").innerHTML=html;modal().style.display="flex";}
+ function firebaseAuthForm(next){
+  const auth=window.nxFirebaseAuth;
+  showContent('<h3>Sign in to Firebase</h3><p style="color:#aaa;font-size:13px">For payment orders, sign in using your email. If your app account uses a different authentication system, it must be connected to Firebase before purchasing.</p><label>Email</label><input id="nxPayEmail" type="email" autocomplete="email" style="display:block;width:100%;padding:12px;background:#101018;border:1px solid #333;color:white;border-radius:9px;margin:8px 0"><label>Password</label><input id="nxPayPassword" type="password" autocomplete="current-password" style="display:block;width:100%;padding:12px;background:#101018;border:1px solid #333;color:white;border-radius:9px;margin:8px 0"><button id="nxPayLogin" class="btn" style="width:100%;margin:8px 0">Log in</button><button id="nxPaySignup" class="chip" style="width:100%">Create Firebase account</button><p id="nxPayAuthError" style="font-size:12px;color:#ff9aab"></p>');
+  const err=modal().querySelector("#nxPayAuthError");
+  async function authRun(signup){const email=modal().querySelector("#nxPayEmail").value.trim(),password=modal().querySelector("#nxPayPassword").value;if(!email||password.length<6){err.textContent="Enter a valid email and password (minimum 6 characters).";return;}try{if(signup)await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password);next();}catch(e){err.textContent=e.message||"Authentication failed";}}
+  modal().querySelector("#nxPayLogin").onclick=()=>authRun(false);modal().querySelector("#nxPaySignup").onclick=()=>authRun(true);
+ }
+ async function startOrder(packageId){
+  if(!ready()){status("Firebase is not configured. Payment ordering is unavailable.");toastMsg("Firebase setup is required first.");return;}
+  if(!packs[packageId])return;
+  if(!window.nxFirebaseAuth.currentUser){firebaseAuthForm(()=>startOrder(packageId));return;}
+  status("Creating payment order…");
+  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;paymentMethod="maya";showPayment();}
+  catch(e){console.error("NEXORA createCoinOrder error",e);status("Could not create order. Try again.");toastMsg("Order creation failed.");}
+ }
+ function showPayment(){
+  const p=packs[currentOrder.packageId];if(!p)return;
+  const imageUrl=paymentMethod==="maya"?config.mayaQrImageUrl:config.qrPhImageUrl;
+  const receiver=paymentMethod==="maya"?(config.mayaDisplayName||"Maya receiver not configured"):(config.qrPhDisplayName||"QR Ph receiver not configured");
+  const html='<h3>Order '+currentOrder.orderId+'</h3><p>Package: <b>'+p.coins.toLocaleString()+' coins</b> · Amount <b>₱'+p.price+'</b></p><div style="display:flex;gap:8px"><button id="nxMethodMaya" class="chip" style="flex:1">Maya</button><button id="nxMethodQr" class="chip" style="flex:1">QR Ph</button></div><div style="margin:12px 0;padding:12px;background:#22222b;border-radius:12px;text-align:center"><b>Pay to: '+receiver+'</b>'+(imageUrl?'<img src="'+imageUrl+'" alt="Payment QR" style="display:block;max-width:230px;width:100%;margin:12px auto;border-radius:8px">':'<p style="color:#f5a7b5;font-size:13px">Payment QR not yet configured. Owner must add the real payment QR image before users can pay.</p>')+'<p style="color:#aaa;font-size:12px">Do not pay until the correct receiver and QR are displayed.</p></div><label>Payment reference number</label><input id="nxPayReference" placeholder="Enter transaction reference" style="display:block;width:100%;padding:12px;background:#101018;border:1px solid #333;color:white;border-radius:9px;margin:8px 0"><button id="nxPaySubmitRef" class="btn" style="width:100%" '+(!imageUrl?'disabled':'')+'>Submit for verification</button><p id="nxPaySubmitStatus" style="color:#bbb;font-size:12px"></p>';
+  showContent(html);
+  modal().querySelector("#nxMethodMaya").onclick=()=>{paymentMethod="maya";showPayment();};
+  modal().querySelector("#nxMethodQr").onclick=()=>{paymentMethod="qrph";showPayment();};
+  const submit=modal().querySelector("#nxPaySubmitRef");if(submit)submit.onclick=submitReference;
+ }
+ async function submitReference(){
+  const ref=modal().querySelector("#nxPayReference").value.trim(),msg=modal().querySelector("#nxPaySubmitStatus");
+  if(ref.length<4){msg.textContent="Please enter your payment reference.";return;}
+  msg.textContent="Submitting reference…";
+  try{const call=window.nxFirebaseFunctions.httpsCallable("submitPaymentReference");await call({orderId:currentOrder.orderId,reference:ref,method:paymentMethod});msg.textContent="Submitted. Coins will be added after manual payment verification.";status("Payment submitted for verification · Order "+currentOrder.orderId);toastMsg("Payment reference submitted.");}
+  catch(e){console.error("NEXORA payment reference error",e);msg.textContent=e.message||"Could not submit reference. Please retry.";}
+ }
+ // Override old Supabase direct-checkout buttons so users cannot be sent to a missing gateway.
+ window.nxStartCheckout=startOrder;
+ // Add safe UI indicator and prevent demo reward claim from being confused with a real balance.
+ document.addEventListener("DOMContentLoaded",()=>{
+  const shop=getShop();if(!shop)return;
+  const tag=shop.querySelector("span");if(tag){tag.textContent="MAYA + QR PH · MANUAL VERIFY";}
+  if(!ready())status("Firebase not configured yet. Coin purchases are disabled; configure Firebase first.");
+  else status("Firebase payment orders ready. Add payment QR details before enabling payment.");
+ });
+})();
