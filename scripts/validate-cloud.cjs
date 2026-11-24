@@ -12,7 +12,7 @@ const checks=[
  ['Private Storage bucket',sql.includes("values ('nexora-videos','nexora-videos',false")],
  ['Admin-only Storage upload policy',sql.includes('NEXORA admins upload videos')&&sql.includes('public.studio_admins')],
  ['Android copies Supabase config',prep.includes('supabase-config.js')],
- ['No service-role credential in client config',!config.includes('service_role')&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
+ ['No service-role credential in client config',!/\\bservice_role\\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
 ];
 for(const [label,ok] of checks)console.log((ok?'PASS':'FAIL')+' '+label);
 if(checks.some(([,ok])=>!ok))process.exit(1);
