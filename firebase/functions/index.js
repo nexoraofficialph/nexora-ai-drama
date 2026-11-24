@@ -80,20 +80,23 @@ exports.adminVerifyPaymentAndCreditCoins = onCall(async (request) => {
     const ledgerRef = db.collection("users").doc(userId).collection("ledger").doc(orderId);
     const userOrderRef = db.collection("users").doc(userId).collection("orders").doc(orderId);
     if (decision === "reject") {
+      const claimId=order.paymentMethod&&order.paymentReference?crypto.createHash("sha256").update(order.paymentMethod+":"+String(order.paymentReference).trim().toUpperCase().replace(/\\s+/g," ")).digest("hex"):null;
+      if(claimId){const claimRef=db.collection("paymentReferenceClaims").doc(claimId);const claimSnap=await tx.get(claimRef);if(claimSnap.exists&&claimSnap.data().orderId===orderId)tx.delete(claimRef);}
       tx.update(orderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
-      tx.update(userOrderRef, { status: "rejected", verifiedAt: FieldValue.serverTimestamp() });
+      tx.update(userOrderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
       return;
     }
     const ledgerSnap = await tx.get(ledgerRef);
     if (ledgerSnap.exists) throw new HttpsError("already-exists", "Coins have already been credited for this order.");
     const walletSnap = await tx.get(walletRef);
-    const currentBalance = walletSnap.exists ? Number(walletSnap.data().coins || 0) : 0;
+    const currentBalance = walletSnap.exists ? Number(walletSnap.data().coins) : 0;
     const credit = Number(order.coins);
-    if (!Number.isInteger(credit) || credit <= 0) throw new HttpsError("failed-precondition", "Invalid coin amount.");
+    if (!Number.isSafeInteger(currentBalance) || currentBalance < 0) throw new HttpsError("failed-precondition", "Invalid wallet balance.");
+    if (!Number.isSafeInteger(credit) || credit <= 0 || !Number.isSafeInteger(currentBalance + credit)) throw new HttpsError("failed-precondition", "Invalid coin credit or balance overflow.");
     tx.set(walletRef, { coins: currentBalance + credit, updatedAt: FieldValue.serverTimestamp() });
     tx.create(ledgerRef, { type: "purchase_credit", orderId, coins: credit, amountPhp: order.pricePhp, method: order.paymentMethod, reference: order.paymentReference, verifiedBy: adminUid, createdAt: FieldValue.serverTimestamp() });
     tx.update(orderRef, { status: "paid", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
-    tx.update(userOrderRef, { status: "paid", verifiedAt: FieldValue.serverTimestamp() });
+    tx.update(userOrderRef, { status: "paid", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp(), paymentMethod: order.paymentMethod, paymentReference: order.paymentReference });
   });
   return { orderId, decision, success: true };
 });
