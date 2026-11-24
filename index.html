@@ -134,7 +134,7 @@ const playerVideo=document.getElementById("demoVideo");playerVideo.addEventListe
 if(!localStorage.getItem("nexoraNotice112")){localStorage.setItem("nexoraNotice112","1");toast("NEXORA 11.12 · Playback access verification and Firebase cleanup.");}
 // Live published catalog read via Supabase RLS.
 async function nxLoadPublishedSupabaseCatalog(){
- const cfg=window.NEXORA_SUPABASE_CONFIG||{},base=String(cfg.url||'').replace(/\\/$/,'').trim(),key=String(cfg.publishableKey||'').trim();
+ const cfg=window.NEXORA_SUPABASE_CONFIG||{},rawBase=String(cfg.url||'').trim(),base=rawBase.endsWith('/')?rawBase.slice(0,-1):rawBase,key=String(cfg.publishableKey||'').trim();
  if(!base.startsWith('https://')||!key)return;
  try{
   const headers={apikey:key},dres=await fetch(base+'/rest/v1/dramas?status=eq.published&select=id,title,slug,synopsis,genre,poster_url,total_episodes&order=updated_at.desc',{headers});
@@ -143,7 +143,7 @@ async function nxLoadPublishedSupabaseCatalog(){
   const ids=cloudDramas.map(d=>d.id).filter(Boolean),eurl=base+'/rest/v1/episodes?status=eq.published&drama_id=in.('+ids.join(',')+')&select=drama_id,episode_number,title,video_url,thumbnail_url&order=episode_number.asc';
   const eres=await fetch(eurl,{headers});if(!eres.ok)throw new Error('Cloud episodes HTTP '+eres.status);
   const eps=await eres.json();
-  for(const d of cloudDramas){const cid='cloud-'+d.id;if(dramas.some(x=>String(x.id)===cid))continue;const list=eps.filter(e=>e.drama_id===d.id),count=Math.max(Number(d.total_episodes)||0,...list.map(e=>Number(e.episode_number)||0)),sources=Array(count).fill('');for(const e of list){const idx=Number(e.episode_number)-1;if(idx>=0&&idx<count&&String(e.video_url||'').startsWith('https://')&&!String(e.video_url).includes(' '))sources[idx]=e.video_url;}dramas.push({id:cid,title:String(d.title||'').slice(0,90),genre:String(d.genre||'Drama'),episodes:Math.max(1,count),label:'CLOUD SERIES',desc:String(d.synopsis||''),poster:d.poster_url||'',episodeSources:sources});}
+  for(const d of cloudDramas){const cid='cloud-'+d.id;if(dramas.some(x=>String(x.id)===cid))continue;const list=eps.filter(e=>e.drama_id===d.id),count=Math.max(Number(d.total_episodes)||0,...list.map(e=>Number(e.episode_number)||0)),sources=Array(count).fill('');for(const e of list){const idx=Number(e.episode_number)-1;if(idx>=0&&idx<count&&String(e.video_url||'').startsWith('https://')&&!String(e.video_url).includes(' '))sources[idx]=e.video_url;}dramas.push({id:cid,title:String(d.title||'').slice(0,90),genre:String(d.genre||'Drama'),episodes:Math.max(1,count),label:'CLOUD SERIES',desc:String(d.synopsis||''),poster:safePosterClass(d.poster_url||''),episodeSources:sources});}
   renderHome();renderSearch();renderLibrary();updateFeed();console.info('NEXORA cloud catalog loaded:',cloudDramas.length);
  }catch(err){console.warn('NEXORA cloud catalog unavailable; local catalog remains:',err);}
 }
