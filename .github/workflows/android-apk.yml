@@ -43,15 +43,25 @@ jobs:
       - name: Generate native launcher and splash assets
         run: npm run assets:android
 
-      - name: Prepare Capacitor web assets
+      - name: Validate Android source assets
+        run: npm run validate:source
+
+      - name: Prepare complete Capacitor Android bundle
         run: |
-          mkdir -p www
-          cp index.html manifest.webmanifest icon.svg app-icon.png supabase-config.js www/
+          npm run prepare:web
           mkdir -p www/assets
           cp assets/splash.svg www/assets/
+          test -s www/index.html
+          test -s www/firebase-config.js
+          test -s www/firebase/payment-ui.js
 
       - name: Sync web app to Android
         run: npx cap sync android
+
+      - name: Verify Firebase assets were copied into Android
+        run: |
+          test -s android/app/src/main/assets/public/firebase-config.js
+          test -s android/app/src/main/assets/public/firebase/payment-ui.js
 
       - name: Build debug APK
         working-directory: android
