@@ -41,8 +41,9 @@
   const safeOrder=escapeHtml(currentOrder.orderId);
   const html='<h3>Order '+safeOrder+'</h3><p>Package: <b>'+pack.coins.toLocaleString()+' coins</b> · Amount <b>₱'+pack.price+'</b></p><div style="display:flex;gap:8px"><button id="nxMethodMaya" class="chip" style="flex:1">Maya</button><button id="nxMethodQr" class="chip" style="flex:1">QR Ph</button></div><div style="margin:12px 0;padding:12px;background:#22222b;border-radius:12px;text-align:center"><b>Pay to: '+receiver+'</b>'+(imageUrl?'<img src="'+imageUrl+'" alt="Payment QR" style="display:block;max-width:230px;width:100%;margin:12px auto;border-radius:8px">':'<p style="color:#f5a7b5;font-size:13px">Payment QR not configured. Do not pay until the real QR image and receiver details are added.</p>')+'<p style="color:#aaa;font-size:12px">No GCash. Coins are credited only after payment is verified.</p></div><label>Payment reference number</label><input id="nxPayReference" placeholder="Enter transaction reference" style="display:block;width:100%;padding:12px;background:#101018;border:1px solid #333;color:white;border-radius:9px;margin:8px 0"><button id="nxPaySubmitRef" class="btn" style="width:100%" '+(!imageUrl?'disabled':'')+'>Submit for verification</button><p id="nxPaySubmitStatus" style="color:#bbb;font-size:12px"></p>';
   showContent(html);
-  modal().querySelector("#nxMethodMaya").onclick=()=>{paymentMethod="maya";showPayment();};
-  modal().querySelector("#nxMethodQr").onclick=()=>{paymentMethod="qrph";showPayment();};
+  modal().querySelector("#nxMethodMaya").disabled=!!currentOrder.referenceSubmitted;modal().querySelector("#nxMethodQr").disabled=!!currentOrder.referenceSubmitted;
+  modal().querySelector("#nxMethodMaya").onclick=()=>{if(currentOrder.referenceSubmitted)return;paymentMethod="maya";showPayment();};
+  modal().querySelector("#nxMethodQr").onclick=()=>{if(currentOrder.referenceSubmitted)return;paymentMethod="qrph";showPayment();};
   const submit=modal().querySelector("#nxPaySubmitRef");if(submit)submit.onclick=submitReference;
  }
  let nxPaymentSubmitting=false;async function submitReference(){
@@ -51,7 +52,7 @@
   if(ref.length<4){msg.textContent="Please enter your payment reference.";return;}
   nxPaymentSubmitting=true;if(submit)submit.disabled=true;const mayaBtn=modal().querySelector("#nxMethodMaya"),qrBtn=modal().querySelector("#nxMethodQr");if(mayaBtn)mayaBtn.disabled=true;if(qrBtn)qrBtn.disabled=true;
   msg.textContent="Submitting reference…";
-  try{const call=window.nxFirebaseFunctions.httpsCallable("submitPaymentReference");await call({orderId,reference:ref,method});if(currentOrder?.orderId===orderId){msg.textContent="Submitted. Coins will be added after manual payment verification.";if(input)input.disabled=true;if(submit)submit.textContent="Reference submitted";status("Payment submitted for verification · Order "+orderId);}toastMsg("Payment reference submitted.");}
+  try{const call=window.nxFirebaseFunctions.httpsCallable("submitPaymentReference");await call({orderId,reference:ref,method});if(currentOrder?.orderId===orderId){currentOrder.referenceSubmitted=true;msg.textContent="Submitted. Coins will be added after manual payment verification.";if(input)input.disabled=true;if(submit)submit.textContent="Reference submitted";status("Payment submitted for verification · Order "+orderId);}toastMsg("Payment reference submitted.");}
   catch(e){console.error("NEXORA payment reference error",e);if(currentOrder?.orderId===orderId){msg.textContent=e.message||"Could not submit reference. Please retry.";if(submit)submit.disabled=false;}}
   finally{nxPaymentSubmitting=false;if(currentOrder?.orderId===orderId){if(mayaBtn)mayaBtn.disabled=false;if(qrBtn)qrBtn.disabled=false;}}
  }
