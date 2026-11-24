@@ -50,7 +50,7 @@ jobs:
           cp studio/manifest.webmanifest www/manifest.webmanifest
           cp studio/icon.svg www/icon.svg
           cp studio/icon.svg app-icon.png
-          cp supabase-config.js www/supabase-config.js
+          cp studio/supabase-config.js www/supabase-config.js
           test -s www/supabase-config.js
           test -s www/index.html
           test -s www/manifest.webmanifest
