@@ -20,7 +20,7 @@ const checks=[
  ['Studio login requires email and password only',studio.includes('id="loginEmail"')&&studio.includes('id="loginPassword"')&&!studio.includes('id="loginProjectUrl"')&&!studio.includes('id="loginPublishableKey"')],
  ['Studio Supabase config reads bundled config',studio.includes('window.NEXORA_SUPABASE_CONFIG')],
  ['Studio APK workflow copies Supabase config',fs.existsSync('.github/workflows/android-studio-apk.yml')&&fs.readFileSync('.github/workflows/android-studio-apk.yml','utf8').includes('cp supabase-config.js www/supabase-config.js')],
- ['Cloud drama IDs filtered to UUIDs before REST query',viewer.includes("cloudDramas.map(d=>d.id).filter(id=>typeof id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))],
+ ['Cloud drama IDs filtered to UUIDs before REST query',viewer.includes("cloudDramas.map(d=>d.id).filter(id=>typeof id")&&viewer.includes("&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))],
  ['Published cloud records update existing catalog entries',viewer.includes('const cloudRecord={id:cid')&&viewer.includes('if(existing>=0)dramas[existing]=cloudRecord;else dramas.push(cloudRecord)'],
  ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
 ];
