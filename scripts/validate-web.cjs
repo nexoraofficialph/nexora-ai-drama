@@ -50,8 +50,9 @@ if(!html.includes('Premium membership is not yet connected to live billing') ||
 }
 
 
-if(!paymentUi.includes('currentOrderUid=window.nxFirebaseAuth.currentUser?.uid||null') ||
-   !paymentUi.includes('window.nxFirebaseAuth.currentUser?.uid!==currentOrderUid') ||
+if(!paymentUi.includes('const creatingUid=window.nxFirebaseAuth.currentUser?.uid||null') ||
+   !paymentUi.includes('window.nxFirebaseAuth.currentUser?.uid!==creatingUid') ||
+   !paymentUi.includes('currentOrderUid=creatingUid') ||
    !paymentUi.includes('Payment order belongs to a previous account')) {
   console.error("Payment orders must be bound to their creating account and blocked after account switching.");
   process.exitCode=1;
