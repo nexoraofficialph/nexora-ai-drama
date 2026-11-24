@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08080c">
 <title>NEXORA AI DRAMA — NEXORA STUDIO</title>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions-compat.js"></script><script src="./firebase-config.js"></script><script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions-compat.js"></script><script src="./firebase-config.js"></script><script src="./supabase-config.js"></script><script>
 (function(){
  const c=window.NEXORA_FIREBASE_CONFIG||{};
  const valid=c.apiKey&&c.projectId&&c.appId&&!String(c.apiKey).startsWith("YOUR_")&&!String(c.projectId).startsWith("YOUR_");
@@ -132,7 +132,23 @@ async function cloudRemoveDrama(i){uploadLocalList();}
 if(nxFirebaseReady()){window.nxFirebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(e=>console.warn("Firebase persistence setting failed",e));window.nxFirebaseAuth.onAuthStateChanged(user=>{nxSetSession(user);updateAccountUi();if(user){cloudSyncList(true);nxRefreshWallet();}else{const status=document.getElementById("nxPaymentStatus");if(status)status.textContent="Sign in to view your Firebase wallet.";const walletHistory=document.getElementById("nxWalletHistory");if(walletHistory)walletHistory.textContent="";}});}
 const playerVideo=document.getElementById("demoVideo");playerVideo.addEventListener("timeupdate",()=>{if(progressSaveTimer)return;progressSaveTimer=setTimeout(()=>{progressSaveTimer=null;saveWatchProgress()},1200)});playerVideo.addEventListener("pause",saveWatchProgress);let nxCompletionHandledRequest=0;playerVideo.addEventListener("ended",()=>{if(nxCompletionHandledRequest===nxPlaybackRequest)return;nxCompletionHandledRequest=nxPlaybackRequest;const d=dramas[selectedDrama];if(!d)return;watchProgress[dramaKey(d)]={episode:currentEpisode,position:playerVideo.duration,duration:playerVideo.duration,completed:true,updatedAt:Date.now()};localStorage.setItem("nexoraWatchProgress",JSON.stringify(watchProgress));renderContinueWatching();if(currentEpisode+1<d.episodes){const next=currentEpisode+1;addNotification("Episode completed","Episode "+(currentEpisode+1)+" finished. Next episode is ready.",true);if(nxAutoNext&&nxEpisodeUnlocked(d,next)){playerStatus("Episode completed · Starting next episode…");selectDemoEpisode(next);}else if(nxEpisodeUnlocked(d,next)){playerStatus("Episode completed · Next episode is ready. Tap EP "+(next+1)+" to continue.");}else{playerStatus("Episode completed · Next episode is locked. Unlock EP "+(next+1)+" to continue.");}}else{addNotification("Drama completed","You finished "+d.title+".",true);playerStatus("Drama completed · You finished "+d.title+".");}});renderHome();renderSearch();renderLibrary();updateFeed();
 if(!localStorage.getItem("nexoraNotice112")){localStorage.setItem("nexoraNotice112","1");toast("NEXORA 11.12 · Playback access verification and Firebase cleanup.");}
-// Cloud catalog intentionally disabled until Firebase catalog migration is deployed.
+// Live published catalog read via Supabase RLS.
+async function nxLoadPublishedSupabaseCatalog(){
+ const cfg=window.NEXORA_SUPABASE_CONFIG||{},base=String(cfg.url||'').replace(/\\/$/,'').trim(),key=String(cfg.publishableKey||'').trim();
+ if(!base.startsWith('https://')||!key)return;
+ try{
+  const headers={apikey:key},dres=await fetch(base+'/rest/v1/dramas?status=eq.published&select=id,title,slug,synopsis,genre,poster_url,total_episodes&order=updated_at.desc',{headers});
+  if(!dres.ok)throw new Error('Cloud dramas HTTP '+dres.status);
+  const cloudDramas=await dres.json();if(!Array.isArray(cloudDramas)||!cloudDramas.length)return;
+  const ids=cloudDramas.map(d=>d.id).filter(Boolean),eurl=base+'/rest/v1/episodes?status=eq.published&drama_id=in.('+ids.join(',')+')&select=drama_id,episode_number,title,video_url,thumbnail_url&order=episode_number.asc';
+  const eres=await fetch(eurl,{headers});if(!eres.ok)throw new Error('Cloud episodes HTTP '+eres.status);
+  const eps=await eres.json();
+  for(const d of cloudDramas){const cid='cloud-'+d.id;if(dramas.some(x=>String(x.id)===cid))continue;const list=eps.filter(e=>e.drama_id===d.id),count=Math.max(Number(d.total_episodes)||0,...list.map(e=>Number(e.episode_number)||0)),sources=Array(count).fill('');for(const e of list){const idx=Number(e.episode_number)-1;if(idx>=0&&idx<count&&String(e.video_url||'').startsWith('https://')&&!String(e.video_url).includes(' '))sources[idx]=e.video_url;}dramas.push({id:cid,title:String(d.title||'').slice(0,90),genre:String(d.genre||'Drama'),episodes:Math.max(1,count),label:'CLOUD SERIES',desc:String(d.synopsis||''),poster:d.poster_url||'',episodeSources:sources});}
+  renderHome();renderSearch();renderLibrary();updateFeed();console.info('NEXORA cloud catalog loaded:',cloudDramas.length);
+ }catch(err){console.warn('NEXORA cloud catalog unavailable; local catalog remains:',err);}
+}
+nxLoadPublishedSupabaseCatalog();
+
 </script>
 <script>
 if ("serviceWorker" in navigator) {
