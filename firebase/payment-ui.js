@@ -6,6 +6,7 @@
  function el(tag,attrs={},children=[]){const n=document.createElement(tag);Object.entries(attrs).forEach(([k,v])=>{if(k==="text")n.textContent=v;else if(k==="html")n.innerHTML=v;else n.setAttribute(k,v)});children.forEach(c=>n.append(c));return n;}
  function toastMsg(m){if(typeof window.toast==="function")window.toast(m);else console.info("[NEXORA]",m);}
  function ready(){return !!window.NX_FIREBASE_READY&&!!window.nxFirebaseFunctions&&!!window.nxFirebaseAuth;}
+ function paymentConfigured(method){const qr=method==="maya"?config.mayaQrImageUrl:config.qrPhImageUrl;const receiver=method==="maya"?config.mayaDisplayName:config.qrPhDisplayName;return typeof qr==="string"&&/^https:\/\/[^\s]+$/i.test(qr)&&typeof receiver==="string"&&receiver.trim().length>0;}
  function getShop(){return document.getElementById("nxCoinShop");}
  function ensureStatus(){let s=document.getElementById("nxPaymentStatus");if(!s){s=el("div",{id:"nxPaymentStatus","aria-live":"polite"});getShop()?.append(s);}return s;}
  function status(m){const s=ensureStatus();if(s)s.textContent=m;}
@@ -24,9 +25,10 @@
  async function startOrder(packageId){
   if(!ready()){status("Firebase is not configured. Payment ordering is unavailable.");toastMsg("Firebase setup is required first.");return;}
   if(!packs[packageId])return;
+  if(!paymentConfigured(paymentMethod)){if(paymentConfigured("qrph"))paymentMethod="qrph";else if(paymentConfigured("maya"))paymentMethod="maya";else{status("Maya and QR Ph receiver details/QR images are not configured. No order was created.");toastMsg("Payments are disabled until the real payment QR details are configured.");return;}}
   if(!window.nxFirebaseAuth.currentUser){firebaseAuthForm(()=>startOrder(packageId));return;}
   status("Creating payment order…");
-  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;paymentMethod="maya";showPayment();}
+  try{const call=window.nxFirebaseFunctions.httpsCallable("createCoinOrder");const res=await call({packageId});currentOrder=res.data;paymentMethod=paymentConfigured("maya")?"maya":"qrph";showPayment();}
   catch(e){console.error("NEXORA createCoinOrder error",e);status("Could not create order. Try again.");toastMsg("Order creation failed.");}
  }
  function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
