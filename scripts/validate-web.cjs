@@ -19,6 +19,7 @@ if(html.includes("NEXORA ORIGINAL")){console.error("Placeholder catalog must not
 if(!html.includes("CATALOG PREVIEW")){console.error("Placeholder catalog preview label missing.");process.exitCode=1;}
 if(!html.includes("const dramaIndex=selectedDrama,episodeIndex=n,request=++nxPlaybackRequest")||!html.includes("const request=++nxPlaybackRequest")||!html.includes("nxEpisodeUnlocks[dramaKey(d)+\":\"+n]=\"firebase-verified\"")){console.error("Episode verification race guards or verified-entitlement persistence missing.");process.exitCode=1;}
 if(!html.includes("seq=nxListSyncSeq,keys=saved.map")||!html.includes("seq!==nxListSyncSeq)return null")){console.error("Stale queued My List upload guard missing.");process.exitCode=1;}
+if(!html.includes('v.removeAttribute("src");v.load();v.classList.remove("nx-switching")')||!html.includes('This episode has no video source configured yet.')){console.error("Missing-source player must stop cleanly without retrying.");process.exitCode=1;}
 const declared=new Set([...html.matchAll(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m=>m[1]));
 const handlers=[...html.matchAll(/onclick\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
 const called=new Set();
