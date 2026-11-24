@@ -1,6 +1,8 @@
 const fs=require('node:fs'),vm=require('node:vm');
 const studio=fs.readFileSync('studio/index.html','utf8'),viewer=fs.readFileSync('index.html','utf8'),config=fs.readFileSync('supabase-config.js','utf8'),sql=fs.readFileSync('supabase/live_cloud_v1.sql','utf8'),prep=fs.readFileSync('scripts/prepare-web.cjs','utf8');
-for(const [label,html] of [['Studio',studio],['Viewer',viewer]]){const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());if(!scripts.length)throw new Error(label+' has no inline scripts');scripts.forEach((source,index)=>{try{new vm.Script(source,{filename:label+' inline script '+(index+1)});}catch(err){console.error(label+' script syntax error:',err.stack);process.exit(1);}});console.log('PASS '+label+' inline script syntax');}
+for(const [label,html] of [['Studio',studio],['Viewer',viewer]]){const scripts=[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(x=>x.trim());if(!scripts.length)throw new Error(label+' has no inline scripts');scripts.forEach((source,index)=>{try{new vm.Script(source,{filename:label+' inline script '+(index+1)});}catch(err){console.error(label+' script syntax error:',err.stack);process.exit(1);}});console.log('PASS '+label+' inline script syntax');}
+const studioWorkflowPath='.github/workflows/android-studio-apk.yml';
+const studioWorkflow=fs.existsSync(studioWorkflowPath)?fs.readFileSync(studioWorkflowPath,'utf8'):'';
 const checks=[
  ['Studio HTTPS source input',studio.includes('id="episodeVideoUrl"')],
  ['Studio cloud publishing function',studio.includes('function publishStudioCatalog()')],
@@ -19,10 +21,10 @@ const checks=[
  ['Cloud requests retry once after unauthorized',studio.includes('res.status===401&&retryAuth')],
  ['Studio login requires email and password only',studio.includes('id="loginEmail"')&&studio.includes('id="loginPassword"')&&!studio.includes('id="loginProjectUrl"')&&!studio.includes('id="loginPublishableKey"')],
  ['Studio Supabase config reads bundled config',studio.includes('window.NEXORA_SUPABASE_CONFIG')],
- ['Studio APK workflow copies Supabase config',fs.existsSync('.github/workflows/android-studio-apk.yml')&&fs.readFileSync('.github/workflows/android-studio-apk.yml','utf8').includes('cp supabase-config.js www/supabase-config.js')],
+ ['Studio APK workflow copies bundled Supabase config',studioWorkflow.includes('cp studio/supabase-config.js www/supabase-config.js')&&studioWorkflow.includes('test -s www/supabase-config.js')],
  ['Cloud drama IDs filtered to UUIDs before REST query',viewer.includes("cloudDramas.map(d=>d.id).filter(id=>typeof id")&&viewer.includes("filter(id=>typeof id==='string'")],
  ['Published cloud records update existing catalog entries',viewer.includes('const cloudRecord={id:cid')&&viewer.includes('if(existing>=0)dramas[existing]=cloudRecord;else dramas.push(cloudRecord)')],
- ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
+ ['No service-role credential in client config',!/\\bservice_role\\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
 ];
 for(const [label,ok] of checks)console.log((ok?'PASS':'FAIL')+' '+label);
 if(checks.some(([,ok])=>!ok))process.exit(1);
