@@ -1,11 +1,12 @@
 {
   "hosting": {
-    "public": ".",
+    "public": "www",
     "ignore": [
       "firebase.json",
       ".firebaserc",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "firebase/functions/**"
     ],
     "cleanUrls": true
   },
