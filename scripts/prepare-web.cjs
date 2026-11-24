@@ -7,6 +7,7 @@ const www = path.join(root, 'www');
 const requiredFiles = [
   'index.html',
   'firebase-config.js',
+  'supabase-config.js',
   'manifest.webmanifest',
   'icon.svg',
   'app-icon.png',
