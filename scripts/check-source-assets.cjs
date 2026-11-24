@@ -18,6 +18,20 @@ const required = [
   'scripts/generate-assets.cjs'
 ];
 let failed = false;
+const appVersionPath = path.join(root, 'APP_VERSION');
+try {
+  const appVersion = fs.readFileSync(appVersionPath, 'utf8').trim();
+  const match = /^(\\d+)\\.(\\d+)$/.exec(appVersion);
+  if (!match || Number(match[2]) >= 1000) {
+    console.error('FAIL APP_VERSION must be major.minor with minor under 1000');
+    failed = true;
+  } else {
+    console.log('PASS APP_VERSION: ' + appVersion);
+  }
+} catch (error) {
+  console.error('FAIL APP_VERSION: ' + error.message);
+  failed = true;
+}
 for (const relative of required) {
   const full = path.join(root, relative);
   if (fs.existsSync(full) && fs.statSync(full).isFile()) {
