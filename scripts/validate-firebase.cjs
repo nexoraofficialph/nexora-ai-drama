@@ -10,6 +10,7 @@ const assertions=[
  ["order status before payment reference submission",'status !== "awaiting_payment"'],
  ["unique payment-reference claim","paymentReferenceClaims"],
  ["provider-independent reference hashing","update(normalizedReference)"],
+ ["claim ID excludes provider/method scope","update(normalizedReference).digest(\"hex\")"],
  ["rejection releases normalized reference claim","update(String(order.paymentReference)"],
  ["admin-only approval","request.auth.token.admin !== true"],
  ["credit ledger idempotency","ledgerSnap.exists"],
