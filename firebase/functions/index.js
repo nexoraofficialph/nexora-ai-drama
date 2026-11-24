@@ -80,7 +80,7 @@ exports.adminVerifyPaymentAndCreditCoins = onCall(async (request) => {
     const ledgerRef = db.collection("users").doc(userId).collection("ledger").doc(orderId);
     const userOrderRef = db.collection("users").doc(userId).collection("orders").doc(orderId);
     if (decision === "reject") {
-      const claimId=order.paymentReference?crypto.createHash("sha256").update(String(order.paymentReference).trim().toUpperCase().replace(/\\s+/g," ")).digest("hex"):null;
+      const claimId=order.paymentReference?crypto.createHash("sha256").update(String(order.paymentReference).trim().toUpperCase().replace(/\s+/g," ")).digest("hex"):null;
       if(claimId){const claimRef=db.collection("paymentReferenceClaims").doc(claimId);const claimSnap=await tx.get(claimRef);if(claimSnap.exists&&claimSnap.data().orderId===orderId)tx.delete(claimRef);}
       tx.update(orderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
       tx.update(userOrderRef, { status: "rejected", verifiedBy: adminUid, verifiedAt: FieldValue.serverTimestamp() });
