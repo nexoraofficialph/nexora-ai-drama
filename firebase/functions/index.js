@@ -114,3 +114,15 @@ exports.spendCoinsAndUnlockEpisode = onCall(async (request) => {
   });
   return { dramaKey, episodeNumber, coinsSpent: result.alreadyUnlocked ? 0 : 10, alreadyUnlocked: result.alreadyUnlocked, balance: result.balance };
 });
+
+// Server-authoritative check; never trust localStorage for paid episode access.
+exports.verifyEpisodeUnlock = onCall(async (request) => {
+  const uid = requireAuth(request);
+  const dramaKey = String(request.data?.dramaKey || "").trim();
+  const episodeNumber = Number(request.data?.episodeNumber);
+  if (!/^[a-zA-Z0-9_-]{1,80}$/.test(dramaKey)) throw new HttpsError("invalid-argument", "Invalid drama identifier.");
+  if (!Number.isInteger(episodeNumber) || episodeNumber < 6 || episodeNumber > 1000) throw new HttpsError("invalid-argument", "Invalid paid episode.");
+  const unlockId = dramaKey + "_ep" + episodeNumber;
+  const snap = await db.collection("users").doc(uid).collection("episodeUnlocks").doc(unlockId).get();
+  return { unlocked: snap.exists, dramaKey, episodeNumber };
+});
