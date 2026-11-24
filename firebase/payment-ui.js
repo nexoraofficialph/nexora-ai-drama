@@ -59,4 +59,19 @@
   if(!ready())status("Firebase not configured yet. Coin purchases are disabled; configure Firebase first.");
   else status("Firebase payment orders ready. Add payment QR details before enabling payment.");
  });
+ // NEXORA 11.2: server-wallet and payment-order status panel.
+ function statusLabel(s){return ({awaiting_payment:"Awaiting payment",pending_verification:"Pending verification",paid:"Paid · coins credited",rejected:"Payment rejected"})[s]||String(s||"Unknown");}
+ function renderFirebaseOrders(rows){const target=document.getElementById("nxWalletHistory");if(!target)return;
+ if(!rows.length){target.textContent="No Firebase coin orders yet.";return;}
+ target.innerHTML='<div style="font-weight:700;margin-bottom:8px">Firebase orders</div>'+rows.map(o=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #292932;font-size:12px"><span>'+escapeHtml(o.coins+' coins · ₱'+o.pricePhp)+'<br><small style="color:#888">'+escapeHtml(o.orderId)+'</small></span><span style="text-align:right;color:'+(o.status==="paid"?"#7de2a5":o.status==="rejected"?"#ff9aab":"#d8c27a")+'">'+escapeHtml(statusLabel(o.status))+'</span></div>').join("");}
+ async function nxRefreshFirebaseWallet(){const historyEl=document.getElementById("nxWalletHistory");if(!ready()){status("Firebase not configured. Live wallet/order tracking is disabled.");if(historyEl)historyEl.textContent="Firebase setup is pending.";return;}
+ const user=window.nxFirebaseAuth.currentUser;if(!user){status("Sign in to Firebase to check your server wallet and order history.");if(historyEl)historyEl.textContent="Firebase sign-in is required for order history.";return;}
+ status("Refreshing Firebase wallet and orders…");try{const db=window.nxFirebaseDb;
+ const walletRef=db.collection("users").doc(user.uid).collection("wallet").doc("balance");const ordersRef=db.collection("users").doc(user.uid).collection("orders");const [walletSnap,ordersSnap]=await Promise.all([walletRef.get(),ordersRef.orderBy("createdAt","desc").limit(10).get()]);const balance=walletSnap.exists?Number(walletSnap.data().coins||0):0;
+ status("Firebase verified wallet: "+balance.toLocaleString()+" coins · server ledger wallet (demo balance is separate).");const rows=ordersSnap.docs.map(d=>({orderId:d.id,...d.data()}));renderFirebaseOrders(rows);
+ }catch(e){console.error("NEXORA Firebase wallet refresh error",e);status("Wallet refresh failed. Check Firebase configuration and Firestore rules.");if(historyEl)historyEl.textContent="Unable to load Firebase orders.";} }
+ window.nxRefreshWallet=nxRefreshFirebaseWallet;
+ if(window.nxFirebaseAuth){window.nxFirebaseAuth.onAuthStateChanged(user=>{if(user){status("Firebase signed in · refreshing secure wallet…");nxRefreshFirebaseWallet();}else{status("Sign in to Firebase to view wallet/order history.");const h=document.getElementById("nxWalletHistory");if(h)h.textContent="Firebase sign-in is required for order history.";}});}
+ // Replace Firebase auth modal copy with a clear warning that it is currently separate from app/Supabase login.
+
 })();
