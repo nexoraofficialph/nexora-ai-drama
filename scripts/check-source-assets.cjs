@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// Verify the source files needed by the web bundle and Android asset pipeline.
+// Verify the source files needed by the Android bundle and native asset pipeline.
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const required = [
   'index.html',
   'supabase-config.js',
+  'firebase-config.js',
+  'firebase/payment-ui.js',
   'manifest.webmanifest',
   'icon.svg',
   'app-icon.png',
@@ -38,4 +40,4 @@ try {
   failed = true;
 }
 if (failed) process.exit(1);
-console.log('Source asset validation passed.');
+console.log('Android source asset validation passed.');
