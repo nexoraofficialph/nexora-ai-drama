@@ -8,7 +8,7 @@ const assertions=[
  ["callable authentication guard","requireAuth(request)"],
  ["server-owned coin package prices","const PACKAGES = Object.freeze"],
  ["order status before payment reference submission",'status !== "awaiting_payment"'],
- ["unique payment-reference claim","paymentReferenceClaims"],
+ ["unique payment-reference claim","paymentReferenceClaims"],\n ["provider-independent reference hashing","update(normalizedReference)"],\n ["rejection releases normalized reference claim","update(String(order.paymentReference)"),
  ["admin-only approval","request.auth.token.admin !== true"],
  ["credit ledger idempotency","ledgerSnap.exists"],
  ["wallet credit in server transaction","tx.set(walletRef"],
