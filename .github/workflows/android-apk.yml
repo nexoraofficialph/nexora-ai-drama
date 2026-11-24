@@ -37,6 +37,11 @@ jobs:
       - name: Validate inline scripts and Firebase account wiring
         run: node scripts/validate-web.cjs
 
+      - name: Validate Firebase callable backend and security invariants
+        run: |
+          node --check firebase/functions/index.js
+          npm run validate:firebase
+
       - name: Capture dependency audit report
         run: npm audit --json > npm-audit-report.json || true
 
