@@ -46,9 +46,9 @@ exports.submitPaymentReference = onCall(async (request) => {
     const snap = await tx.get(orderRef);
     if (!snap.exists || snap.data().userId !== uid) throw new HttpsError("not-found", "Order not found.");
     if (snap.data().status !== "awaiting_payment") throw new HttpsError("failed-precondition", "Order is no longer awaiting payment.");
-    const duplicateQuery = db.collection("paymentOrders").where("paymentReference", "==", reference).where("paymentMethod", "==", method).limit(1);
+    const duplicateQuery = db.collection("paymentOrders").where("paymentReference", "==", reference).limit(10);
     const duplicateSnap = await tx.get(duplicateQuery);
-    if (!duplicateSnap.empty) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
+    if (duplicateSnap.docs.some(doc => doc.data().paymentMethod === method)) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
     tx.update(orderRef, { paymentMethod: method, paymentReference: reference, status: "pending_verification", submittedAt: FieldValue.serverTimestamp() });
     tx.update(userOrderRef, { paymentMethod: method, paymentReference: reference, status: "pending_verification", submittedAt: FieldValue.serverTimestamp() });
   });
