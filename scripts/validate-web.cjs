@@ -33,5 +33,20 @@ if(missing.length){console.error("Inline button handlers without matching functi
 const ids=[...html.matchAll(/\bid\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
 const duplicates=ids.filter((id,i)=>ids.indexOf(id)!==i);
 if(duplicates.length){console.error("Duplicate HTML id values:",[...new Set(duplicates)].join(", "));process.exitCode=1;}
+
+// Account-switch isolation guard: lists and unlocks must use per-user storage scopes.
+if(!html.includes('function nxListScopeKey(kind,uid){return "nexora"+kind+":"+(uid||"guest")}') ||
+   !html.includes('function nxUnlockScopeKey(uid){return "nexoraEpisodeUnlocks:"+(uid||"guest")}') ||
+   !html.includes('nxLoadLocalLists(nextScope)') ||
+   !html.includes('nxEpisodeUnlocks=nxLoadUnlocksFor(nxUnlockScope)')) {
+  console.error("Account-switch local data isolation guards missing.");
+  process.exitCode=1;
+}
+if(!html.includes('Premium membership is not yet connected to live billing') ||
+   !html.includes('Premium · Coming soon')) {
+  console.error("Premium billing must not be presented as active before live billing is wired.");
+  process.exitCode=1;
+}
+
 if(process.exitCode)process.exit(process.exitCode);
 console.log("Web validation passed: "+scripts.length+" inline scripts syntax-checked; "+handlers.length+" click handlers checked; duplicate IDs checked; Firebase auth/My List/wallet and server-verified episode unlock wiring checked; legacy Supabase references blocked.");
