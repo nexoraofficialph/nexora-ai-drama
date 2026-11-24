@@ -54,7 +54,7 @@
   msg.textContent="Submitting reference…";
   try{const call=window.nxFirebaseFunctions.httpsCallable("submitPaymentReference");await call({orderId,reference:ref,method});if(currentOrder?.orderId===orderId){currentOrder.referenceSubmitted=true;msg.textContent="Submitted. Coins will be added after manual payment verification.";if(input)input.disabled=true;if(submit)submit.textContent="Reference submitted";status("Payment submitted for verification · Order "+orderId);}toastMsg("Payment reference submitted.");}
   catch(e){console.error("NEXORA payment reference error",e);if(currentOrder?.orderId===orderId){msg.textContent=e.message||"Could not submit reference. Please retry.";if(submit)submit.disabled=false;}}
-  finally{nxPaymentSubmitting=false;if(currentOrder?.orderId===orderId){if(mayaBtn)mayaBtn.disabled=false;if(qrBtn)qrBtn.disabled=false;}}
+  finally{nxPaymentSubmitting=false;if(currentOrder?.orderId===orderId){if(mayaBtn)mayaBtn.disabled=!!currentOrder.referenceSubmitted;if(qrBtn)qrBtn.disabled=!!currentOrder.referenceSubmitted;}}
  }
  // Override old Supabase direct-checkout buttons so users cannot be sent to a missing gateway.
  window.nxStartCheckout=startOrder;
