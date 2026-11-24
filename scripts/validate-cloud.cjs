@@ -17,6 +17,9 @@ const checks=[
  ['Studio auth refresh implementation',studio.includes('function refreshStudioAuth()')],
  ['Cloud requests proactively refresh expiring tokens',studio.includes('Date.now()>=session.expires_at-60000')],
  ['Cloud requests retry once after unauthorized',studio.includes('res.status===401&&retryAuth')],
+ ['Studio login requires email and password only',studio.includes('id="loginEmail"')&&studio.includes('id="loginPassword"')&&!studio.includes('id="loginProjectUrl"')&&!studio.includes('id="loginPublishableKey"')],
+ ['Studio Supabase config reads bundled config',studio.includes('window.NEXORA_SUPABASE_CONFIG')],
+ ['Studio APK workflow copies Supabase config',fs.existsSync('.github/workflows/android-studio-apk.yml')&&fs.readFileSync('.github/workflows/android-studio-apk.yml','utf8').includes('cp supabase-config.js www/supabase-config.js')],
  ['No service-role credential in client config',!/\bservice_role\s*:/i.test(config)&&!studio.includes('SUPABASE_SERVICE_ROLE_KEY')]
 ];
 for(const [label,ok] of checks)console.log((ok?'PASS':'FAIL')+' '+label);
