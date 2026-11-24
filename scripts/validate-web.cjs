@@ -1,6 +1,7 @@
 const fs=require("node:fs");
 const vm=require("node:vm");
 const html=fs.readFileSync("index.html","utf8");
+const paymentUi=fs.readFileSync("firebase/payment-ui.js","utf8");
 const appVersion=fs.readFileSync("APP_VERSION","utf8").trim();
 if(!/^\d+\.\d+$/.test(appVersion)||!html.includes("Version "+appVersion)){console.error("APP_VERSION must be a numeric major.minor version and match the About display.");process.exitCode=1;}
 const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
@@ -49,9 +50,9 @@ if(!html.includes('Premium membership is not yet connected to live billing') ||
 }
 
 
-if(!html.includes('currentOrderUid=window.nxFirebaseAuth.currentUser?.uid||null') ||
-   !html.includes('window.nxFirebaseAuth.currentUser?.uid!==currentOrderUid') ||
-   !html.includes('Payment order belongs to a previous account')) {
+if(!paymentUi.includes('currentOrderUid=window.nxFirebaseAuth.currentUser?.uid||null') ||
+   !paymentUi.includes('window.nxFirebaseAuth.currentUser?.uid!==currentOrderUid') ||
+   !paymentUi.includes('Payment order belongs to a previous account')) {
   console.error("Payment orders must be bound to their creating account and blocked after account switching.");
   process.exitCode=1;
 }
