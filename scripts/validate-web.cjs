@@ -5,6 +5,8 @@ const paymentUi=fs.readFileSync("firebase/payment-ui.js","utf8");
 const appVersion=fs.readFileSync("APP_VERSION","utf8").trim();
 if(!/^\d+\.\d+$/.test(appVersion)||!html.includes("Version "+appVersion)){console.error("APP_VERSION must be a numeric major.minor version and match the About display.");process.exitCode=1;}
 const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+if(!html.includes('<span>App version</span><b>'+appVersion+'</b>')){console.error("Profile version label must match APP_VERSION.");process.exitCode=1;}
+if(html.includes("nexoraNotice112")||html.includes("NEXORA 11.12 · Playback access verification")){console.error("Obsolete Viewer 11.12 startup notice found.");process.exitCode=1;}
 if(!scripts.length)throw new Error("No inline scripts found");
 scripts.forEach((source,i)=>{try{new vm.Script(source,{filename:"index.html:inline-script-"+(i+1)});}catch(e){console.error("Inline script "+(i+1)+" syntax error:",e.stack);process.exitCode=1;}});
 const required=[
