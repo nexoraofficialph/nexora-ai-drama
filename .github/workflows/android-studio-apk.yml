@@ -2,6 +2,8 @@ name: Build NEXORA STUDIO Admin APK
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -35,6 +37,8 @@ jobs:
         run: npm install
       - name: Validate Studio auth session safeguards
         run: node scripts/validate-studio.cjs
+      - name: Validate cloud catalog publishing and private upload
+        run: npm run validate:cloud
       - name: Switch to Studio native config before Android project creation
         run: cp capacitor.studio.config.json capacitor.config.json
       - name: Generate Android project for Studio
