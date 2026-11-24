@@ -21,7 +21,7 @@ let failed = false;
 const appVersionPath = path.join(root, 'APP_VERSION');
 try {
   const appVersion = fs.readFileSync(appVersionPath, 'utf8').trim();
-  const match = /^(\\d+)\\.(\\d+)$/.exec(appVersion);
+  const match = /^(\d+)\\.(\d+)$/.exec(appVersion);
   if (!match || Number(match[2]) >= 1000) {
     console.error('FAIL APP_VERSION must be major.minor with minor under 1000');
     failed = true;
