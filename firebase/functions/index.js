@@ -1,6 +1,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const crypto = require("crypto");
 initializeApp();
 const db = getFirestore();
 
@@ -37,18 +38,24 @@ exports.submitPaymentReference = onCall(async (request) => {
   const uid = requireAuth(request);
   const orderId = String(request.data?.orderId || "");
   const reference = String(request.data?.reference || "").trim().slice(0, 100);
+  const normalizedReference = reference.toUpperCase().replace(/\\s+/g, " ");
   const method = String(request.data?.method || "");
   if (!orderId || reference.length < 4) throw new HttpsError("invalid-argument", "Enter a valid payment reference.");
   if (!["maya", "qrph"].includes(method)) throw new HttpsError("invalid-argument", "Unsupported payment method.");
+  const referenceClaimId = crypto.createHash("sha256").update(method + ":" + normalizedReference).digest("hex");
+  const referenceClaimRef = db.collection("paymentReferenceClaims").doc(referenceClaimId);
   const orderRef = db.collection("paymentOrders").doc(orderId);
   const userOrderRef = db.collection("users").doc(uid).collection("orders").doc(orderId);
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(orderRef);
     if (!snap.exists || snap.data().userId !== uid) throw new HttpsError("not-found", "Order not found.");
     if (snap.data().status !== "awaiting_payment") throw new HttpsError("failed-precondition", "Order is no longer awaiting payment.");
+    const claimSnap = await tx.get(referenceClaimRef);
+    if (claimSnap.exists) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
     const duplicateQuery = db.collection("paymentOrders").where("paymentReference", "==", reference);
     const duplicateSnap = await tx.get(duplicateQuery);
     if (duplicateSnap.docs.some(doc => doc.data().paymentMethod === method)) throw new HttpsError("already-exists", "This payment reference has already been submitted for this payment method.");
+    tx.create(referenceClaimRef, { method, normalizedReference, orderId, userId: uid, claimedAt: FieldValue.serverTimestamp() });
     tx.update(orderRef, { paymentMethod: method, paymentReference: reference, status: "pending_verification", submittedAt: FieldValue.serverTimestamp() });
     tx.update(userOrderRef, { paymentMethod: method, paymentReference: reference, status: "pending_verification", submittedAt: FieldValue.serverTimestamp() });
   });
