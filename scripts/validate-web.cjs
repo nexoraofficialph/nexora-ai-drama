@@ -16,6 +16,7 @@ if(/supabase/i.test(html)){console.error("Legacy Supabase references remain in t
 if(html.includes("DEMO PURCHASES")||html.includes("buyDemoCoins(50)")){console.error("Old demo coin-shop buttons still present.");process.exitCode=1;}
 if(!html.includes("const defaultCatalog=normalizeCatalog(defaultDramas),storedCatalog=normalizeCatalog(getStore(\"nexoraCatalog\"))")){console.error("Catalog migration missing: stored catalog must not replace canonical defaults.");process.exitCode=1;}
 if(!html.includes("const dramaIndex=selectedDrama,episodeIndex=n,request=++nxPlaybackRequest")||!html.includes("const request=++nxPlaybackRequest")||!html.includes("nxEpisodeUnlocks[dramaKey(d)+\":\"+n]=\"firebase-verified\"")){console.error("Episode verification race guards or verified-entitlement persistence missing.");process.exitCode=1;}
+if(!html.includes("seq=nxListSyncSeq,keys=saved.map")||!html.includes("seq!==nxListSyncSeq)return null")){console.error("Stale queued My List upload guard missing.");process.exitCode=1;}
 const declared=new Set([...html.matchAll(/\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(m=>m[1]));
 const handlers=[...html.matchAll(/onclick\s*=\s*["']([^"']+)["']/gi)].map(m=>m[1]);
 const called=new Set();
