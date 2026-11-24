@@ -70,6 +70,16 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
+      - name: Apply app release version to Android build
+        run: |
+          version=$(cat APP_VERSION)
+          code=$(printf '%s' "$version" | tr -d '.')
+          test "$version" = "11.14"
+          sed -i -E "s/versionCode [0-9]+/versionCode ${code}/; s/versionName \"[^\"]+\"/versionName \"${version}\"/" android/app/build.gradle
+          grep -q "versionCode ${code}" android/app/build.gradle
+          grep -q "versionName \"${version}\"" android/app/build.gradle
+          echo "Android version set to ${version} (${code})."
+
       - name: Install and validate Firebase Android configuration
         run: |
           node -e "const c=require('./google-services.json'); const clients=c.client||[]; if(c.project_info?.project_id!=='nexora-ai-drama'||!clients.some(x=>x.client_info?.android_client_info?.package_name==='com.nexorastudio.aidrama')) process.exit(1); console.log('Firebase Android config matches NEXORA AI DRAMA.');"
