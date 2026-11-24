@@ -5,7 +5,6 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const required = [
   'index.html',
-  'supabase-config.js',
   'firebase-config.js',
   'firebase/payment-ui.js',
   'google-services.json',
