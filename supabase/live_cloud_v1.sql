@@ -28,3 +28,17 @@ grant select on public.dramas, public.episodes to anon, authenticated;
 grant insert, update, delete on public.dramas, public.episodes to authenticated;
 
 -- Studio assets remain private to authenticated admins through the existing RLS policy.
+
+-- Private NEXORA video bucket: admin-only uploads and reads; no public playback grant.
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
+values ('nexora-videos','nexora-videos',false,52428800,array['video/mp4','video/webm','video/quicktime'])
+on conflict (id) do update set public=false,file_size_limit=52428800,allowed_mime_types=array['video/mp4','video/webm','video/quicktime'];
+drop policy if exists "NEXORA admins upload videos" on storage.objects;
+create policy "NEXORA admins upload videos" on storage.objects for insert to authenticated
+with check (bucket_id='nexora-videos' and exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
+drop policy if exists "NEXORA admins read private videos" on storage.objects;
+create policy "NEXORA admins read private videos" on storage.objects for select to authenticated
+using (bucket_id='nexora-videos' and exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));
+drop policy if exists "NEXORA admins delete videos" on storage.objects;
+create policy "NEXORA admins delete videos" on storage.objects for delete to authenticated
+using (bucket_id='nexora-videos' and exists(select 1 from public.studio_admins a where a.user_id=(select auth.uid())));

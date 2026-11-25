@@ -1,6 +1,10 @@
 const fs=require('fs');
 const html=fs.readFileSync('studio/index.html','utf8');
 const checks=[
+ ['bundled Supabase config loaded before Studio app scripts',html.includes('<script src="./supabase-config.js"></script>')],
+ ['login overlay closes before dashboard header',/<\/div><\/div><\/div>\s*<header>/.test(html)],
+ ['Android WebView has inline public-config fallback',html.includes('window.NEXORA_SUPABASE_CONFIG=window.NEXORA_SUPABASE_CONFIG||{url:"https://ystudugfquekasxfyeid.supabase.co",publishableKey:"sb_publishable_')],
+ ['email/password sign-in reads the configured project and key',html.includes('async function signInStudio()')&&html.includes('cfg=getCloudConfig()')],
  ['session expiry validation',/function readAuthSession\(\)[\s\S]*?Date\.now\(\)>=s\.expires_at/.test(html)],
  ['expiry re-lock function',/function enforceStudioSession\(\)/.test(html)],
  ['foreground revalidation',/visibilitychange[\s\S]*?enforceStudioSession/.test(html)],

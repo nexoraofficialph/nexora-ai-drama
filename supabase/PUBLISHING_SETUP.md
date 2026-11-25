@@ -1,6 +1,6 @@
 # NEXORA shared catalog publishing setup
 
-This is groundwork only. It is **not live-connected** to NEXORA STUDIO or the viewer yet.
+This setup document covers the cloud catalog integration introduced in NEXORA 11.17. Client integration exists in the branch, but live connectivity remains unverified until the dedicated Supabase project is configured and tests are completed.
 
 ## 1. Confirm the correct Supabase project
 Do not apply this SQL to a project that belongs to another app (for example, a portfolio project). Confirm that a dedicated NEXORA project is selected first.

@@ -5,6 +5,8 @@ const paymentUi=fs.readFileSync("firebase/payment-ui.js","utf8");
 const appVersion=fs.readFileSync("APP_VERSION","utf8").trim();
 if(!/^\d+\.\d+$/.test(appVersion)||!html.includes("Version "+appVersion)){console.error("APP_VERSION must be a numeric major.minor version and match the About display.");process.exitCode=1;}
 const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+if(!html.includes('<span>App version</span><b>'+appVersion+'</b>')){console.error("Profile version label must match APP_VERSION.");process.exitCode=1;}
+if(html.includes("nexoraNotice112")||html.includes("NEXORA 11.12 · Playback access verification")){console.error("Obsolete Viewer 11.12 startup notice found.");process.exitCode=1;}
 if(!scripts.length)throw new Error("No inline scripts found");
 scripts.forEach((source,i)=>{try{new vm.Script(source,{filename:"index.html:inline-script-"+(i+1)});}catch(e){console.error("Inline script "+(i+1)+" syntax error:",e.stack);process.exitCode=1;}});
 const required=[
@@ -15,7 +17,7 @@ const required=[
  "async function playEpisode(","verifyEpisodeUnlock","spendCoinsAndUnlockEpisode"
 ];
 for(const needle of required)if(!html.includes(needle)){console.error("Missing required app/Firebase/playback wiring: "+needle);process.exitCode=1;}
-if(/supabase/i.test(html)){console.error("Legacy Supabase references remain in the Android app entry.");process.exitCode=1;}
+if(/SUPABASE_SERVICE_ROLE_KEY|service_role/i.test(html)){console.error("Supabase service-role secret reference detected in Viewer client.");process.exitCode=1;}
 if(html.includes("DEMO PURCHASES")||html.includes("buyDemoCoins(50)")){console.error("Old demo coin-shop buttons still present.");process.exitCode=1;}
 if(!html.includes("const defaultCatalog=normalizeCatalog(defaultDramas),storedCatalog=normalizeCatalog(getStore(\"nexoraCatalog\"))")){console.error("Catalog migration missing: stored catalog must not replace canonical defaults.");process.exitCode=1;}
 if(html.includes("NEXORA ORIGINAL")){console.error("Placeholder catalog must not be labeled as original production content.");process.exitCode=1;}
@@ -60,5 +62,6 @@ if(!paymentUi.includes('const creatingUid=window.nxFirebaseAuth.currentUser?.uid
   process.exitCode=1;
 }
 
+if(!html.includes('getStore("nexoraWatchProgress:guest")')||!html.includes('nexoraWatchProgress:"+nxProgressScope')||!html.includes('nxProgressScope=nextScope')){console.error("Watch progress must be isolated per Firebase account.");process.exitCode=1;}
 if(process.exitCode)process.exit(process.exitCode);
 console.log("Web validation passed: "+scripts.length+" inline scripts syntax-checked; "+handlers.length+" click handlers checked; duplicate IDs checked; Firebase auth/My List/wallet and server-verified episode unlock wiring checked; legacy Supabase references blocked.");
